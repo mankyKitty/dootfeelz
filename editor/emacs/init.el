@@ -44,17 +44,40 @@
 ;; Prepare the package-en-ing
 (require 'use-package)
 
+(use-package eldoc
+  :ensure t
+  :config 
+  (eldoc-add-command
+   'paredit-backward-delete
+   'paredit-close-round))
+
+(use-package material-theme
+  :ensure t
+  :config
+  (load-theme 'material t))
+
 ;; Show us yer keys
-(use-package which-key :ensure t)
+(use-package which-key :ensure t
+  :config
+  'which-key-popup-type 'minibuffer
+  (which-key-mode))
 
 ;; Counsel for Awesomez
 (use-package counsel :ensure t)
+(use-package counsel-projectile :ensure t
+  :config (counsel-projectile-on))
 
 ;; Eeeeeeeevil
 (use-package evil
   :ensure t
   :config
   (evil-mode))
+
+;; Yay surroundasaurus
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
 
 ;; General Purpose
 (use-package multiple-cursors
@@ -67,11 +90,23 @@
     (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)))
 
 (use-package magit  :ensure t)
-(use-package paredit :ensure t)
+(use-package evil-magit  :ensure t)
+
+(use-package paredit :ensure t
+  :config
+  (add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
+  (add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
+  (add-hook 'ielm-mode-hook             #'enable-paredit-mode)
+  (add-hook 'lisp-mode-hook             #'enable-paredit-mode)
+  (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
+  (add-hook 'scheme-mode-hook           #'enable-paredit-mode))
+
 (use-package rainbow-delimiters
   :ensure t
   :config
+  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+
 ;; Checky checky checky!
 (use-package flycheck
   :ensure t)
@@ -97,6 +132,8 @@
  :non-normal-prefix "C-SPC"
 
  ;; Simple commands
+ "c" '(:ignore t :which-key "Comment")
+ "cl" '(comment-or-uncomment-region-or-line :which-key "comment line")
 
  ;; File
  "f" '(:ignore t :which-key "files")
@@ -107,6 +144,7 @@
  ;; Project
  "p" '(:ignore t :which-key "project")
  "pf" '(counsel-git :which-key "find file in git dir")
+ "pp" 'counsel-projectile-switch-project
 
  ;; Movement / Buffer
  "'" '(iterm-focus :which-key "iterm")
@@ -119,6 +157,7 @@
  "a" '(:ignore t :which-key "Applications")
  "ar" 'ranger
  "ad" 'dired
+
  ;; Magit
  "g" '(:ignore t :which-key "Git")
  "gs" 'magit-status
