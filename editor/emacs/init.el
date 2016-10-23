@@ -8,7 +8,7 @@
     ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" default)))
  '(package-selected-packages
    (quote
-    (psc-ide psci purescript-mode ranger counsel avy general haskell-mode company flycheck rainbow-delimiters paredit magit multiple-cursors evil which-key use-package)))
+    (coffee-mode emmet-mode ensime scala-mode psc-ide psci purescript-mode ranger counsel avy general haskell-mode company flycheck rainbow-delimiters paredit magit multiple-cursors evil which-key use-package)))
  '(scroll-bar-mode nil)
  '(tool-bar-mode nil))
 (custom-set-faces
@@ -51,8 +51,8 @@
 (setq package-enable-at-startup nil)
 (setq package-archives '(("org"       . "http://orgmode.org/elpa/")
                          ("gnu"       . "http://elpa.gnu.org/packages/")
-			 ("melpa"     . "https://melpa.org/packages/")
-			 ("melpa-stable" . "https://stable.melpa.org/packages/")
+                         ("melpa"     . "https://melpa.org/packages/")
+                         ("melpa-stable" . "https://stable.melpa.org/packages/")
                          ("emacs-pe" . "https://emacs-pe.github.io/packages/")
                          ;("marmalade" . "http://marmalade-repo.org/packages/")
                          ))
@@ -69,7 +69,7 @@
 
 (use-package eldoc
   :ensure t
-  :config 
+  :config
   (eldoc-add-command
    'paredit-backward-delete
    'paredit-close-round))
@@ -112,10 +112,21 @@
   :config
   (projectile-mode))
 
-;; Counsel for Awesomez
+;; Counsel for Awesomez -- Replace this with Helm :/
 (use-package counsel :ensure t)
 (use-package counsel-projectile :ensure t
   :config (counsel-projectile-on))
+
+;; Wheetspeece
+(setq whitespace-action '(auto-cleanup))
+(setq whitespace-style
+      '(trailing
+        space-before-tab
+        indentation
+        empty
+        space-after-tab))
+(global-whitespace-mode)
+;; End Wheetspeece
 
 ;; Eeeeeeeevil
 (use-package evil
@@ -187,6 +198,44 @@
   :ensure t
   :config
   (add-hook 'purescript-mode-hook #'psc-ide-mode))
+;; End Purescript
+
+;; Da Scalaazzzz
+(use-package scala-mode
+  :ensure t
+  :interpreter
+  ("scala" . scala-mode))
+
+(use-package ensime
+  :ensure t
+  :pin melpa-stable)
+;; End Scalaazzzz
+
+;; Web/Html/Js ewww
+(use-package web-mode
+  :ensure t
+  :config
+  'web-mode-code-indent-offset 2
+  'web-mode-markup-indent-offset 2
+  'web-mode-css-indent-offset 2
+  'web-mode-enable-current-column-highlight t
+  'web-mode-content-types-alist '(("html" . ".*\\.tpl.html\\'"))
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.js?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.tpl.html\\'" . web-mode)))
+
+(use-package emmet-mode
+  :ensure t
+  :config
+  (add-hook 'web-mode 'emmet-mode))
+
+(use-package coffee-mode
+  :ensure t
+  :config
+  'coffee-tab-width 2
+  (add-to-list 'auto-mode-alist '("\\.coffee$" . coffee-mode)))
+
+;; End Web/Html/Js ewww
 
 ;; Keybinding hotness
 (use-package key-chord :ensure t :config (key-chord-mode 1))
@@ -215,7 +264,7 @@
  "ff" 'counsel-find-file
  "fr" 'counsel-recentf
  "fs" 'save-buffer
- 
+
  ;; Project
  "p" '(:ignore t :which-key "project")
  "pf" '(counsel-git :which-key "find file in git dir")
