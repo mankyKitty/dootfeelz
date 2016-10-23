@@ -8,7 +8,8 @@
     ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" default)))
  '(package-selected-packages
    (quote
-    (ranger counsel avy general haskell-mode company flycheck rainbow-delimiters paredit magit multiple-cursors evil which-key use-package)))
+    (psc-ide psci purescript-mode ranger counsel avy general haskell-mode company flycheck rainbow-delimiters paredit magit multiple-cursors evil which-key use-package)))
+ '(scroll-bar-mode nil)
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -32,8 +33,6 @@
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)) )
 ;; inhibit useless and old-school startup screen
 (setq inhibit-startup-screen t )
-;; No more scroll bars
-(setq scroll-bar-mode nil)
 ;; silent bell when you make a mistake
 (setq ring-bell-function 'ignore )
 ;; use utf-8 by default
@@ -54,7 +53,10 @@
                          ("gnu"       . "http://elpa.gnu.org/packages/")
 			 ("melpa"     . "https://melpa.org/packages/")
 			 ("melpa-stable" . "https://stable.melpa.org/packages/")
-                         ("marmalade" . "http://marmalade-repo.org/packages/")))
+                         ("emacs-pe" . "https://emacs-pe.github.io/packages/")
+                         ;("marmalade" . "http://marmalade-repo.org/packages/")
+                         ))
+
 (package-initialize)
 
 ;; Bootstrap `use-package'
@@ -72,6 +74,10 @@
    'paredit-backward-delete
    'paredit-close-round))
 
+;; Font time!
+(set-face-attribute 'default nil :font "Source Code Pro-11")
+(set-frame-font "Source Code Pro-11" nil t)
+
 (use-package material-theme
   :ensure t
   :config
@@ -80,6 +86,18 @@
 (use-package smart-mode-line
   :ensure t
   :config
+  'sml/shorten-modes t
+  'sml/mode-width 'full
+  (add-to-list 'sml/replacer-regexp-list
+               '("^~/Documents/Projects" ":Prj:"))
+  (add-to-list 'sml/replacer-regexp-list
+               '("^:Prj:/Rust" ":Rust:") t)
+  (add-to-list 'sml/replacer-regexp-list
+               '("^:Prj:/Pure[sS]cript" ":PS:") t)
+  (add-to-list 'sml/replacer-regexp-list
+               '("^:Prj:/Idris" ":Idr:") t)
+  (add-to-list 'sml/replacer-regexp-list
+               '("^:Prj:/Haskell" ":Hask:") t)
   (sml/setup))
 
 ;; Show us yer keys
@@ -155,18 +173,32 @@
   (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
   (add-hook 'haskell-mode-hook 'flycheck-mode))
 
-;; Keybinding hotness
-(use-package general :ensure t)
-(use-package key-chord
+;; Purescript woop woop
+(use-package purescript-mode :ensure t :pin emacs-pe
+  :config
+  (add-hook 'purescript-mode-hook 'haskell-indentation-mode)
+  (add-hook 'purescript-mode-hook
+            (lambda ()
+              (company-mode)
+              (flycheck-mode))))
+
+(use-package psci :ensure t :pin emacs-pe)
+(use-package psc-ide
   :ensure t
   :config
-  (key-chord-mode 1))
+  (add-hook 'purescript-mode-hook #'psc-ide-mode))
+
+;; Keybinding hotness
+(use-package key-chord :ensure t :config (key-chord-mode 1))
+(use-package general :ensure t)
 
 ;; State shift keybindings
-;; (key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
 (general-define-key
  :states '(visual insert emacs)
  (general-chord "jk") 'evil-normal-state)
+
+;; Counsel M-x !
+(general-define-key "M-x" 'counsel-M-x)
 
 (general-define-key
  ;; Replace some defaults
@@ -196,8 +228,6 @@
  "bb" 'ivy-switch-buffer
 
  ;; Movement
- "'" '(iterm-focus :which-key "iterm")
- "?" '(iterm-goto-filedir-or-home :which-key "iterm - goto dir")
  "/" 'counsel-ag
  "TAB" '(lambda () (interactive) (switch-to-buffer (other-buffer)))
  "SPC" '(avy-goto-word-or-subword-1 :which-key "go to char")
