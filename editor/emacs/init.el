@@ -100,6 +100,11 @@
                '("^:Prj:/Haskell" ":Hask:") t)
   (sml/setup))
 
+;; Line numbers
+(setq linum-format "%4d \u2502")
+(global-linum-mode)
+;; End Line numbers
+
 ;; Show us yer keys
 (use-package which-key :ensure t
   :config
