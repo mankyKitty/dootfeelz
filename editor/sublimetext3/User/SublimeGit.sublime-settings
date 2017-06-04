@@ -1,0 +1,31 @@
+{
+     /*
+     * Executables
+     *
+     * The simplest way to make sure that everything works
+     * is to make sure that all of these are in your
+     * sublime path.
+     *
+     * You can see your current sublime path by opening the
+     * console and entering "import os; os.getenv('PATH')".
+     * Be aware that your sublime path might be different
+     * depending on how you started sublime. If you are
+     * unsure where your executables are, try running
+     * "which {executable}" in your terminal.
+     *
+     * If you can't put these executables in your path you
+     * can change them to absolute paths here. Be aware
+     * that each item in the list will be quoted on its
+     * own. Examples:
+     *
+     * ['/usr/local/bin/git']
+     * ['/usr/bin/git', 'flow']
+     * ['git', 'flow']
+     */
+    "git_executables": {
+        "git": ["git"],
+        "git_flow": ["/usr/local/bin/git-flow"],
+        "legit": ["legit"],
+        "gitk": ["gitk"]
+    }
+  }

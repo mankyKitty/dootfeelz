@@ -1,0 +1,5 @@
+{
+  "shell_cmd": "sbt -no-colors compile",
+  "selector": "source.scala",
+  "working_dir": "/Users/schalmers/Repos/$project_base_name"
+}

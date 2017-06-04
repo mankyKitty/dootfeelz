@@ -1,0 +1,38 @@
+{
+	"bootstrapped": true,
+	"in_process_packages":
+	[
+	],
+	"installed_packages":
+	[
+		"Alignment",
+		"AlignTab",
+		"Anaconda",
+		"BeautifyRust",
+		"Better CoffeeScript",
+		"DashDoc",
+		"GitGutter",
+		"Markdown Extended",
+		"ModernPerl",
+		"Package Control",
+		"Pony Language",
+		"PureScript",
+		"Racket",
+		"Rust Enhanced",
+		"RustAutoComplete",
+		"Sass",
+		"SideBarEnhancements",
+		"SublimeGit",
+		"SublimeHaskell",
+		"SublimeLinter",
+		"SublimeLinter-coffee",
+		"SublimeLinter-coffeelint",
+		"SublimeLinter-contrib-erlc",
+		"SublimeLinter-contrib-perl",
+		"SublimeLinter-contrib-rustc",
+		"SublimeLinter-contrib-scalac",
+		"SublimeLinter-hlint",
+		"SublimeLinter-shellcheck",
+		"SublimeREPL"
+	]
+}

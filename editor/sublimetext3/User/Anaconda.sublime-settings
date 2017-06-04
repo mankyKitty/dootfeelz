@@ -1,0 +1,28 @@
+{
+    /*
+        Do not fix the errors listed here:
+        Note: By default we ignore E309 as this is not pep8 but it does
+        conflict with pep257 D211.
+    */
+    "autoformat_ignore":
+    [
+        "E309",
+        "E121"
+    ],
+        /*
+        A list of pep8 error numbers to ignore.
+        The list of error codes is in this file:
+            https://github.com/jcrocholl/pep8/blob/master/pep8.py.
+        Search for "Ennn:", where nnn is a 3-digit number.
+        E309 is ignored by default as it conflicts with pep257 E211
+    */
+    "pep8_ignore":
+    [
+        "E309",
+        "E111"
+    ],
+
+    // Maximum line length for pep8
+    "pep8_max_line_length": 100,
+    "mypy": true
+}
