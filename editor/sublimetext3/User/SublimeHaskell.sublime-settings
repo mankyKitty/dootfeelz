@@ -13,5 +13,5 @@
   "enable_hdevtools": false,
   "enable_hsdev": false,
   "inspect_modules": false,
-  "haskell_build_tool": "stack"
+  "haskell_build_tool": "cabal"
 }

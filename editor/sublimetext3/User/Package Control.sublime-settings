@@ -14,6 +14,7 @@
 		"GitGutter",
 		"Markdown Extended",
 		"ModernPerl",
+		"Nix",
 		"Package Control",
 		"Pony Language",
 		"PureScript",
@@ -33,6 +34,7 @@
 		"SublimeLinter-contrib-scalac",
 		"SublimeLinter-hlint",
 		"SublimeLinter-shellcheck",
-		"SublimeREPL"
+		"SublimeREPL",
+		"TypeScript"
 	]
 }
