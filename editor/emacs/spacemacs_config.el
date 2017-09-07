@@ -140,9 +140,9 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '( monokai
+   dotspacemacs-themes '( spacemacs-dark
+                          monokai
                           material
-                          spacemacs-dark
                           spacemacs-light
                           )
    ;; If non nil the cursor color matches the state color in GUI Emacs.
@@ -321,6 +321,11 @@ you should place your code here."
   (setq-default evil-escape-key-sequence "jk")
   (setq ensime-startup-notification nil)
   (setq ensime-startup-snapshot-notification nil)
+
+  (letrec ((find-pg-cmd "nix-env -qa --out-path -f \"<nixpkgs>\" -A emacsPackages.proofgeneral | awk '{ print $2 }'")
+           (pg-path (string-remove-suffix "\n" (shell-command-to-string find-pg-cmd)))
+           )
+    (load-file (format "%s/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el" pg-path  )))
 
   (defun my-setup-indent (n)
     ;; java/c/c++

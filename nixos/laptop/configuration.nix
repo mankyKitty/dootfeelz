@@ -11,8 +11,8 @@
     ];
 
   # VBox setup
-  virtualisation.virtualbox.guest.enable = true;
-  boot.initrd.checkJournalingFS = false;
+  # virtualisation.virtualbox.guest.enable = true;
+  # boot.initrd.checkJournalingFS = false;
 
   # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
@@ -37,9 +37,11 @@
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
     wget
+    gawk
     which
-    sublime3
     emacs
+    sublime3
+    neovim
     haskellPackages.cabal-install
     haskellPackages.ghcid
     haskellPackages.cabal2nix
@@ -48,15 +50,21 @@
     haskellPackages.stylish-haskell
     nix-repl
     silver-searcher
+    ed
     sudo
     htop
     dmenu
-    irssi
     keepassx
     iosevka
     plan9port
-    idrisPackages.idris
-    erlang
+    pkgs.idrisPackages.idris
+    pkgs.erlang
+    pkgs.ats2
+    pkgs.gcc
+    pkgs.coq
+    pkgs.coqPackages.ssreflect
+    pkgs.racket
+    pkgs.crawlTiles
   ];
 
   # List services that you want to enable:
@@ -68,8 +76,8 @@
   services.openssh.enable = true;
 
   # ERMAGERD PERSTGREEZ
-  services.postgresql.enable = true;
-  services.postgresql.package = pkgs.postgresql;
+  # services.postgresql.enable = true;
+  # services.postgresql.package = pkgs.postgresql;
 
   # Enable core fonts - requires allowNonFree
   # fonts.enableCoreFonts = true;
@@ -119,7 +127,7 @@
     allowedTCPPorts = [ 443 9999 22 ];
   };
   # Enable CUPS to print documents.
-  # services.printing.enable = true;
+  services.printing.enable = true;
 
   # Enable the X11 windowing system.
   # services.xserver.enable = true;

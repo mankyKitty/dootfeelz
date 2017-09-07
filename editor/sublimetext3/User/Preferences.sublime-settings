@@ -16,8 +16,8 @@
 		"node_modules",
 		"bower_components"
 	],
-	"font_face": "Isoevka",
-	"font_size": 10,
+	"font_face": "Iosevka",
+	"font_size": 9,
 	"ignore_vcs_packages": true,
 	"ignored_packages":
 	[
@@ -37,7 +37,7 @@
 	"overlay_scroll_bars": "enabled",
 	"rulers":
 	[
-		100
+		80
 	],
 	"shift_tab_unindent": true,
 	"spell_check": true,
