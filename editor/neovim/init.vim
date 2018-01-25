@@ -29,6 +29,13 @@ Plug 'Shougo/deoplete.nvim'
 Plug 'bling/vim-airline'
 Plug 'scrooloose/nerdtree'
 
+" Te he
+Plug 'alex-ren/org.ats-lang.toolats', { 'rtp': 'org.ats-lang.toolats.vim' }
+
+" OMG
+Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
+Plug 'Mercury-Language/mercury', { 'rtp': 'vim', 'do': 'make install' }
+
 call plug#end()
 
 syntax on
@@ -72,9 +79,9 @@ endif
 
 " GHC-MOD Settings
 " Reload
-map <silent> tu :call GHC_BrowseAll()<CR>
+" map <silent> tu :call GHC_BrowseAll()<CR>
 " Type Lookup
-map <silent> tw :call GHC_ShowType(1)<CR>
+" map <silent> tw :call GHC_ShowType(1)<CR>
 
 " Ctrl-P Info
 set runtimepath^=~/.nvim/plugged/ctrlp.vim
@@ -87,6 +94,11 @@ set tabstop=2
 set shiftwidth=2
 set softtabstop=2
 set completeopt=longest,menuone
+
+" Prettiness
+" set background = "dark"
+colorscheme molokai
+let g:molokai_original = 1
 
 let mapleader = ","
          

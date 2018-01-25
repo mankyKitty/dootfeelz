@@ -1,17 +1,9 @@
 {
-  // Extra directories to be added to the front of the PATH environment variable.
-  // Specify this for using custom ghc, cabal, and ghc-mod
-  // Example: /home/user/.cabal/bin
-  "add_to_PATH": ["/Users/schalmers/.local/bin"],
-  // lint & check on the fly
-  "lint_check_fly": true,
-  "auto_build_mode": "normal",
-  "auto_run_tests": false,
-  "enable_auto_lint": false,
-  "enable_auto_check": false,
-  "enable_ghc_mod": false,
-  "enable_hdevtools": false,
-  "enable_hsdev": false,
-  "inspect_modules": false,
-  "haskell_build_tool": "cabal"
+  "haskell_build_tool": "cabal",
+  "backends": {
+    "No backend": {
+      "default": true,
+      "backend": "none"
+    }
+  }
 }
