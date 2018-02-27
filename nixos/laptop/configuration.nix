@@ -311,7 +311,7 @@
   fileSystems."/mnt/machines" = {
     device = "//192.168.1.4/machines";
     fsType = "cifs";
-    options = [ "username=machines" "password=machines" "x-systemd.automount" "noauto" ];
+    options = [ "username=sigh" "password=honestly" "x-systemd.automount" "noauto" ];
   };
 
   # hardware.pulseaudio.enable = true;
