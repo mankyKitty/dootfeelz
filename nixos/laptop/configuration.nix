@@ -33,6 +33,9 @@
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
     # Misc system level things
+    pkgs.shellcheck
+    pkgs.jq
+    pkgs.alsaUtils
     pkgs.arandr
     pkgs.networkmanagerapplet
     upower
@@ -42,6 +45,7 @@
     wget
     gawk
     which
+    tree
     rxvt_unicode-with-plugins
     xorg.xbacklight
     nix-repl
@@ -52,6 +56,7 @@
     keepassx
     iosevka
     keychain
+    pkgs.gitAndTools.hub
     pkgs.crawlTiles
     pkgs.xscreensaver
     pkgs.stow
@@ -66,86 +71,55 @@
     pkgs.firefox
     # Right in the inbox
     pkgs.thunderbird
+    # Yubikey!
+    unstable.yubioath-desktop
+    pkgs.networkmanager_openconnect
   ] ++ [
     # Editor shenanigans
     emacs
     emacsPackages.proofgeneral
-    # unstable.sublime3
-    neovim
+
+    unstable.neovim
+    unstable.python35Packages.neovim
+
     ed
     plan9port
-    (unstable.vscode-with-extensions.override {
-      vscode = unstable.vscode;
-      vscodeExtensions = with unstable.vscode-extensions; [
-        bbenoist.Nix
-      ]
-      ++ unstable.vscode-utils.extensionsFromVscodeMarketplace [
-        { name      = "org-mode";
-          publisher = "tootone";
-          version   = "0.5.0";
-          sha256    = "bd7c28de814bc0aff063b5c4a61f651af5d82318d9b317881384d50113a6576a";
-        }
-        { name      = "stylish-haskell";
-          publisher = "vigoo";
-          version   = "0.0.9";
-          sha256    = "195646786391d1679dea8354394dd9ea4fd7c03f9c46f2cd8755f0ffbd5fcd9e";
-        }
-        { name      = "language-haskell";
-          publisher = "JustusAdam";
-          version   = "2.4.0";
-          sha256    = "fb75d783c6d5ec21a6e4cd9a207033190abb3510c0516d4d196e163e34d0fdf5";
-        }
-        { name      = "vscode-hie-server";
-          publisher = "alanz";
-          version   = "0.0.6";
-	  sha256    = "28e223543aac5ad7fb7ef6116bb389f6b05ce67aeb70eaf1d76c4e856f3df5dd";
-        }
-        { name      = "Vim";
-          publisher = "VsCodeVim";
-          version   = "0.10.11";
-	  sha256    = "2b29ace673e33610ce87852a807b8986c8596a27ef8198a46bb4c90a41935f60";
-        }
-        { name      = "vscode-markdownlint";
-          publisher = "DavidAnson";
-          version   = "0.12.1";
-	  sha256    = "3f08939831bd51ba0c91a41aa0f283d9c8792a3a0b76ff0e0d25ba3bbcdaaa47";
-        }
-      ];
-    })
   ] ++ [
     # AVR / Arduino Embedded Things
-    avrdude
-    avrbinutils
-    avrgcc
-    avrlibc
+    # avrdude
+    # avrbinutils
+    # avrgcc
+    # avrlibc
   ] ++ [
     # Bonus language round!
-    pkgs.erlang
-    pkgs.ats2
-    pkgs.gcc
-    pkgs.coq
-    pkgs.coqPackages.ssreflect
-    pkgs.racket
-    pkgs.mercury
-    pkgs.pakcs
-    pkgs.j
-    pkgs.gnumake
+    unstable.tlaplus
+    unstable.erlang
+    unstable.ats2
+    unstable.gnuapl
+    unstable.gcc
+    unstable.coq
+    unstable.coqPackages.ssreflect
+    unstable.racket
+    unstable.mercury
+    unstable.j
+    unstable.gnumake
     # Eww
-    pkgs.python3
+    unstable.python3
   ] ++ [
     # Haskell Packages
-    haskellPackages.cabal-install
+    unstable.haskellPackages.cabal-install
     unstable.haskellPackages.ghcid
-    haskellPackages.cabal2nix
+    unstable.haskellPackages.cabal2nix
     unstable.haskellPackages.hlint
+    unstable.haskellPackages.stylish-haskell
+    unstable.haskellPackages.hoogle
+
     haskellPackages.doctest
     haskellPackages.ghc
-    haskellPackages.stylish-haskell
-    haskellPackages.hoogle
-    # unstable.haskell.packages.ghc802.haskell-ide-engine
-    unstable.haskellPackages.haskell-ide-engine
+
     # XMonad Haskell type things
-    haskellPackages.taffybar
+    # unstable.haskellPackages.taffybar
+    unstable.haskellPackages.xmobar
   ];
 
   # Fishy fishy
@@ -155,10 +129,13 @@
   programs.adb.enable = true;
 
   # List services that you want to enable:
-  
+
   # Emacs!
   # services.emacs.enable = true;
-  
+
+  # Yubi!
+  services.pcscd.enable = true;
+
   # VBox setup
   virtualisation.virtualbox.host = {
     enable = true;
@@ -184,7 +161,7 @@
 
   services.upower.enable = true;
   powerManagement.enable = true;
-  
+
   # ERMAGERD PERSTGREEZ
   # services.postgresql.enable = true;
   # services.postgresql.package = pkgs.postgresql;
@@ -196,13 +173,14 @@
       pkgs.iosevka
       pkgs.hasklig
       pkgs.source-code-pro
+      pkgs.fira-code
     ];
     fontconfig = {
       enable = true;
       ultimate.enable = true;
       defaultFonts = {
         monospace = ["Iosevka"];
-      };	
+      };
     };
   };
 
@@ -216,6 +194,7 @@
     xrandrHeads = [ "eDP1" "DP1-1" ];
     resolutions = [ { x = 2560; y = 1440; } { x = 1920; y = 1200; } ];
 
+    startOpenSSHAgent = true;
     displayManager = {
       lightdm.enable = true;
     };
@@ -223,7 +202,6 @@
     windowManager.xmonad = {
       enable = true;
       enableContribAndExtras = true;
-      extraPackages = haskellPackages : [haskellPackages.taffybar];
     };
     displayManager.sessionCommands =  ''
        xrdb "${pkgs.writeText  "xrdb.conf" ''
@@ -231,50 +209,50 @@
           XTerm*faceName:             xft:Iosevka:size=10
           XTerm*utf8:                 2
 
-	  ! special
-	  *.foreground:               \#f8f8f2
-	  *.background:               \#272822
-	  *.cursorColor:              \#f8f8f2
+    ! special
+    *.foreground:               \#f8f8f2
+    *.background:               \#272822
+    *.cursorColor:              \#f8f8f2
 
-	  ! black
-	  *.color0:                   \#272822
-	  *.color8:                   \#75715e
+    ! black
+    *.color0:                   \#272822
+    *.color8:                   \#75715e
 
-	  ! red
-	  *.color1:                   \#f92672
-	  *.color9:                   \#f92672
+    ! red
+    *.color1:                   \#f92672
+    *.color9:                   \#f92672
 
-	  ! green
-	  *.color2:                   \#a6e22e
-	  *.color10:                  \#a6e22e
+    ! green
+    *.color2:                   \#a6e22e
+    *.color10:                  \#a6e22e
 
-	  ! yellow
-	  *.color3:                   \#f4bf75
-	  *.color11:                  \#f4bf75
+    ! yellow
+    *.color3:                   \#f4bf75
+    *.color11:                  \#f4bf75
 
-	  ! blue
-	  *.color4:                   \#66d9ef
-	  *.color12:                  \#66d9ef
+    ! blue
+    *.color4:                   \#66d9ef
+    *.color12:                  \#66d9ef
 
-	  ! magenta
-	  *.color5:                   \#ae81ff
-	  *.color13:                  \#ae81ff
+    ! magenta
+    *.color5:                   \#ae81ff
+    *.color13:                  \#ae81ff
 
-	  ! cyan
-	  *.color6:                   \#a1efe4
-	  *.color14:                  \#a1efe4
+    ! cyan
+    *.color6:                   \#a1efe4
+    *.color14:                  \#a1efe4
 
-	  ! white
-	  *.color7:                   \#f8f8f2
-	  *.color15:                  \#f9f8f5
+    ! white
+    *.color7:                   \#f8f8f2
+    *.color15:                  \#f9f8f5
 
-	  Xft*dpi:                    96
-	  Xft.hinting:                true 
-          Xft.hintstyle:              hintfull 
-          Xft.antialias:              rgba 
+    Xft*dpi:                    96
+    Xft.hinting:                true
+          Xft.hintstyle:              hintfull
+          Xft.antialias:              rgba
           Xft.rgba:                   rgb
        ''}"
-    '';    
+    '';
     # Touchpad setup, maybe
     synaptics = {
       enable = true;
@@ -311,7 +289,7 @@
   fileSystems."/mnt/machines" = {
     device = "//192.168.1.4/machines";
     fsType = "cifs";
-    options = [ "username=sigh" "password=honestly" "x-systemd.automount" "noauto" ];
+    options = [ "username=no" "password=okay" "x-systemd.automount" "noauto" ];
   };
 
   # hardware.pulseaudio.enable = true;
@@ -321,16 +299,17 @@
   users.extraUsers.manky = {
     isNormalUser = true;
     home = "/home/manky";
-    extraGroups = [ 
+    extraGroups = [
       "wheel"
       "networkmanager"
       "cdrom"
       "audio"
-      "vboxusers" 
+      "vboxusers"
       "adbusers"
     ];
     description = "Sean Chalmers";
     uid = 1000;
+    shell = "/run/current-system/sw/bin/fish";
   };
 
   nixpkgs.config = {
@@ -344,9 +323,9 @@
       };
     };
   };
-    
-  # Added from https://github.com/reflex-frp/reflex-platform/blob/develop/notes/NixOS.md
+
   nix.binaryCaches = [
+    # Added from https://github.com/reflex-frp/reflex-platform/blob/develop/notes/NixOS.md
     "https://cache.nixos.org"
     "https://nixcache.reflex-frp.org"
   ];
@@ -355,7 +334,6 @@
   ];
 
   # The NixOS release to be compatible with for stateful data such as databases.
-  system.stateVersion = "17.09";
+  system.stateVersion = "18.03";
 
 }
-

@@ -29,7 +29,8 @@ This function should only modify configuration layer settings."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(yaml
+   '(shell-scripts
+     yaml
      javascript
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -38,9 +39,7 @@ This function should only modify configuration layer settings."
      ;; ----------------------------------------------------------------
      ;; Languages
      coq
-     ;; haskell
-     ( haskell :variables haskell-completion-backend 'dante )
-     ;; purescript
+     (haskell :variables haskell-completion-backend 'dante)
      erlang
      html
      markdown
@@ -51,18 +50,22 @@ This function should only modify configuration layer settings."
      emacs-lisp
      git
      ;; neotree
-     ;; org
+     (org :variables
+          org-enable-github-support t
+          org-enable-reveal-js-support t
+          org-projectile-capture-template "* TODO %?\n  %T\n  [[%l][file_link]]"
+          )
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
-     syntax-checking
+     (syntax-checking :variables syntax-checking-enable-by-default nil)
      ;; version-control
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '( dante monokai-theme material-theme nix-mode )
+   dotspacemacs-additional-packages '( dante monokai-theme nix-mode gnu-apl-mode nix-sandbox )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -94,6 +97,18 @@ It should only modify the values of Spacemacs settings."
    ;; Maximum allowed time in seconds to contact an ELPA repository.
    ;; (default 5)
    dotspacemacs-elpa-timeout 5
+
+   ;; Set `gc-cons-threshold' and `gc-cons-percentage' when startup finishes.
+   ;; This is an advanced option and should not be changed unless you suspect
+   ;; performance issues due to garbage collection operations.
+   ;; (default '(100000000 0.1))
+   dotspacemacs-gc-cons '(100000000 0.1)
+
+   ;; If non-nil then Spacelpa repository is the primary source to install
+   ;; a locked version of packages. If nil then Spacemacs will install the
+   ;; latest version of packages from MELPA. (default nil)
+   dotspacemacs-use-spacelpa nil
+
    ;; If non-nil then verify the signature for downloaded Spacelpa archives.
    ;; (default nil)
    dotspacemacs-verify-spacelpa-archives nil
@@ -130,6 +145,7 @@ It should only modify the values of Spacemacs settings."
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
    dotspacemacs-startup-lists '((recents . 5)
                                 (projects . 7))
+
    ;; True if the home buffer should respond to resize events. (default t)
    dotspacemacs-startup-buffer-responsive t
    ;; Default major mode of the scratch buffer (default `text-mode')
@@ -148,10 +164,10 @@ It should only modify the values of Spacemacs settings."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Iosevka"
-                               :size 12
+                               :size 13
                                :weight normal
-                               :width normal
-                               :powerline-scale 1.0)
+                               :width normal)
+
    ;; The leader key (default "SPC")
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands `M-x' (after pressing on the leader key).
@@ -175,17 +191,7 @@ It should only modify the values of Spacemacs settings."
    ;; In the terminal, these pairs are generally indistinguishable, so this only
    ;; works in the GUI. (default nil)
    dotspacemacs-distinguish-gui-tab nil
-   ;; If non-nil `Y' is remapped to `y$' in Evil states. (default nil)
-   dotspacemacs-remap-Y-to-y$ nil
-   ;; If non-nil, the shift mappings `<' and `>' retain visual state if used
-   ;; there. (default t)
-   dotspacemacs-retain-visual-state-on-shift t
-   ;; If non-nil, `J' and `K' move lines up and down when in visual mode.
-   ;; (default nil)
-   dotspacemacs-visual-line-move-text nil
-   ;; If non-nil, inverse the meaning of `g' in `:substitute' Evil ex-command.
-   ;; (default nil)
-   dotspacemacs-ex-substitute-global nil
+
    ;; Name of the default layout (default "Default")
    dotspacemacs-default-layout-name "Default"
    ;; If non-nil the default layout name is displayed in the mode-line.
@@ -209,19 +215,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-auto-save-file-location 'cache
    ;; Maximum number of rollback slots to keep in the cache. (default 5)
    dotspacemacs-max-rollback-slots 5
-   ;; If non-nil, `helm' will try to minimize the space it uses. (default nil)
-   dotspacemacs-helm-resize nil
-   ;; if non-nil, the helm header is hidden when there is only one source.
-   ;; (default nil)
-   dotspacemacs-helm-no-header nil
-   ;; define the position to display `helm', options are `bottom', `top',
-   ;; `left', or `right'. (default 'bottom)
-   dotspacemacs-helm-position 'bottom
-   ;; Controls fuzzy matching in helm. If set to `always', force fuzzy matching
-   ;; in all non-asynchronous sources. If set to `source', preserve individual
-   ;; source settings. Else, disable fuzzy matching in all sources.
-   ;; (default 'always)
-   dotspacemacs-helm-use-fuzzy 'always
+
    ;; If non-nil, the paste transient-state is enabled. While enabled, pressing
    ;; `p' several times cycles through the elements in the `kill-ring'.
    ;; (default nil)
@@ -266,8 +260,12 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-show-transient-state-title t
    ;; If non-nil show the color guide hint for transient state keys. (default t)
    dotspacemacs-show-transient-state-color-guide t
-   ;; If non-nil unicode symbols are displayed in the mode line. (default t)
-   dotspacemacs-mode-line-unicode-symbols t
+
+   ;; If non-nil unicode symbols are displayed in the mode line.
+   ;; If you use Emacs as a daemon and wants unicode characters only in GUI set
+   ;; the value to quoted `display-graphic-p'. (default t)
+   dotspacemacs-mode-line-unicode-symbols 'display-graphic-p
+
    ;; If non-nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters point
    ;; when it reaches the top or bottom of the screen. (default t)
@@ -300,6 +298,18 @@ It should only modify the values of Spacemacs settings."
    ;; `current', `all' or `nil'. Default is `all' (highlight any scope and
    ;; emphasis the current one). (default 'all)
    dotspacemacs-highlight-delimiters 'all
+
+   ;; If non-nil, start an Emacs server if one is not already running.
+   ;; (default nil)
+   dotspacemacs-enable-server nil
+
+   ;; Set the emacs server socket location.
+   ;; If nil, uses whatever the Emacs default is, otherwise a directory path
+   ;; like \"~/.emacs.d/server\". It has no effect if
+   ;; `dotspacemacs-enable-server' is nil.
+   ;; (default nil)
+   dotspacemacs-server-socket-dir nil
+
    ;; If non-nil, advise quit functions to keep server open when quitting.
    ;; (default nil)
    dotspacemacs-persistent-server nil
@@ -307,10 +317,7 @@ It should only modify the values of Spacemacs settings."
    ;; tool of the list. Supported tools are `rg', `ag', `pt', `ack' and `grep'.
    ;; (default '("rg" "ag" "pt" "ack" "grep"))
    dotspacemacs-search-tools '("rg" "ag" "pt" "ack" "grep")
-   ;; The default package repository used if no explicit repository has been
-   ;; specified with an installed package.
-   ;; Not used for now. (default nil)
-   dotspacemacs-default-package-repository nil
+
    ;; Format specification for setting the frame title.
    ;; %a - the `abbreviated-file-name', or `buffer-name'
    ;; %t - `projectile-project-name'
@@ -337,15 +344,15 @@ It should only modify the values of Spacemacs settings."
    ;; `trailing' to delete only the whitespace at end of lines, `changed' to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup 'all
+   dotspacemacs-whitespace-cleanup nil
+
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
    dotspacemacs-zone-out-when-idle nil
    ;; Run `spacemacs/prettify-org-buffer' when
    ;; visiting README.org files of Spacemacs.
    ;; (default nil)
-   dotspacemacs-pretty-docs nil
-   ))
+   dotspacemacs-pretty-docs nil))
 
 (defun dotspacemacs/user-init ()
   "Initialization for user code:
@@ -354,6 +361,9 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
   (setq evil-want-abbrev-expand-on-insert-exit nil)
+
+  (autoload 'q-mode "/home/manky/wtg/q/q-mode/q-mode.el")
+  (add-to-list 'auto-mode-alist '("\\.[kq]\\'" . q-mode))
   )
 
 (defun dotspacemacs/user-config ()
@@ -364,10 +374,30 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
   (setq-default evil-escape-key-sequence "jk")
 
-  (autoload 'q-mode "/home/manky/wtg/q/q-mode/q-mode.el")
-  (add-to-list 'auto-mode-alist '("\\.[kq]\\'" . q-mode))
+  ;; Try to load the ATS2 Emacs mode & flycheck packages
+  (add-to-list 'load-path
+               (concat (shell-command-to-string "nix eval -f '<nixos-unstable>' --raw ats2")
+                       "/share/emacs/site-lisp/ats2/"
+                       ))
+  (load "ats2-mode")
+  (load "flycheck-ats2")
+  (load "flymake-ats2")
+
+  (require 'ats-mode)
+  (add-to-list 'auto-mode-alist '("\\.[dats|sats]\\'" . ats-mode))
+
+  (require 'nix-mode)
+  (add-to-list 'auto-mode-alist '("\\.[nix]\\'" . nix-mode))
 
   (global-company-mode)
+
+  (require 'gnu-apl-mode)
+  (defun em-gnu-apl-init ()
+    (setq buffer-face-mode-face 'gnu-apl-default)
+    (buffer-face-mode))
+
+  (add-hook 'gnu-apl-interactive-mode-hook 'em-gnu-apl-init)
+  (add-hook 'gnu-apl-mode-hook 'em-gnu-apl-init)
 
   (defun my-setup-indent (n)
     ;; java/c/c++
@@ -386,17 +416,75 @@ before packages are loaded."
 
   (my-setup-indent 2)
 
+  ;; Configure hoogle to use Nix
+  (setq haskell-hoogle-command
+        (nix-executable-find (nix-current-sandbox) "hoogle"))
+
+  ;; Setup the dante project values according to the proposed layout for
+  ;; shared common code, i.e
+  ;;
+  ;; dante-project-root === <immediate folder with a shell.nix>
+  ;; dante-repl-command-line === cabal new-repl <dante-target> --buildir=dist/dante
+
+  (defun reflex-set-dante-locals ()
+    (make-local-variable 'dante-project-root)
+    (make-local-variable 'dante-repl-command-line)
+    (setq dante-project-root
+          (locate-dominating-file buffer-file-name "shell.nix"))
+    (if dante-target
+        (let ((cabal-cmd
+               (concat "cabal new-repl " dante-target " --builddir=dist/dante")))
+          (setq dante-repl-command-line (list "nix-shell" "--run" cabal-cmd)))
+      nil))
+
+  (defun flycheck-haskell-setup-nix-locals ()
+    ;; disable the haskell-stack-ghc checker
+    (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
+    (add-hook 'hack-local-variables-hook #'reflex-set-dante-locals nil 'local)
+    )
+
+  ;; Configure Flycheck to use Nix
+  ;; requires the `nix-sandbox' package
+  (setq flycheck-command-wrapper-function
+        (lambda (command) (apply 'nix-shell-command (nix-current-sandbox) command)))
+  (setq flycheck-executable-find
+        (lambda (cmd) (nix-executable-find (nix-current-sandbox) cmd)))
+
+  ;; Explicitly set the ghc and hlint buffer-local executable values
+  (make-local-variable 'flycheck-haskell-ghc-executable)
+  (make-local-variable 'flycheck-haskell-hlint-executable)
+  (setq flycheck-haskell-ghc-executable
+        (nix-executable-find (nix-current-sandbox) "ghc")
+        flycheck-haskell-hlint-executable
+        (nix-executable-find (nix-current-sandbox) "hlint"))
+
+  ;; Make the executable-find a local function that uses nix
+  (make-local-variable 'executable-find)
+
+  (setq executable-find
+          (lambda (cmd) (nix-executable-find (nix-current-sandbox) cmd)))
+  (message "set flycheck-haskell-ghc-executable to: %S" flycheck-haskell-ghc-executable)
+
   (add-hook 'haskell-mode-hook 'dante-mode)
   (add-hook 'dante-mode-hook
-            '(lambda ()
-               (flycheck-add-next-checker 'haskell-dante
-                                          '(warning . haskell-hlint))))
+            '(lambda () (flycheck-add-next-checker 'haskell-dante
+                                              '(warning . haskell-hlint))))
+  (add-hook 'dante-mode-hook #'flycheck-haskell-setup-nix-locals)
 
-  ;; (setq-default dante-repl-command-line-methods-alist
-  ;;               `((new-build . ,(lambda (root)
-  ;;                                 (when (or (directory-files root nil ".*\\.cabal$") (file-exists-p "cabal.project"))
-  ;;                                   '("cabal" "new-repl" dante-target))))
-  ;;                 (bare . ,(lambda (_) '("cabal" "repl" dante-target)))))
+  ;; Configure hoogle to use Nix
+  (setq haskell-hoogle-command
+        (nix-executable-find (nix-current-sandbox) "hoogle"))
+
+  ;; Configure haskell-mode to (haskell-cabal) to use Nix
+  (setq haskell-process-wrapper-function
+        (lambda (args) (apply 'nix-shell-command (nix-current-sandbox) args)))
+  ;; Configure haskell-mode to use cabal new-style builds
+  (setq haskell-process-type 'cabal-new-repl)
+
+  ;; Limit flycheck to haskell mode only
+  (setq flycheck-global-modes '(haskell-mode))
+
+  (global-prettify-symbols-mode +1)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -413,7 +501,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (yasnippet-snippets yaml-mode ws-butler winum web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen unfill toc-org tagedit symon string-inflection spaceline-all-the-icons all-the-icons memoize spaceline powerline smeargle slim-mode scss-mode sass-mode restart-emacs rainbow-delimiters pug-mode proof-general popwin persp-mode pcre2el password-generator paradox spinner overseer org-bullets open-junk-file nix-mode neotree nameless mwim move-text monokai-theme mmm-mode material-theme markdown-toc markdown-mode magit-gitflow macrostep lorem-ipsum livid-mode skewer-mode linum-relative link-hint less-css-mode json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc indent-guide impatient-mode htmlize simple-httpd hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore request helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets haml-mode google-translate golden-ratio gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip pos-tip flycheck-haskell flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit magit magit-popup git-commit ghub let-alist with-editor evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-cleverparens smartparens paredit evil-args evil-anzu anzu eval-sexp-fu highlight erlang emmet-mode elisp-slime-nav editorconfig dumb-jump define-word dante lcr flycheck f counsel-projectile projectile counsel swiper ivy pkg-info epl company-web web-completion-data company-tern s dash-functional tern company-statistics company-ghci company-ghc ghc haskell-mode company-coq dash company-math math-symbol-lists company-cabal company column-enforce-mode coffee-mode cmm-mode clean-aindent-mode centered-cursor-mode auto-yasnippet yasnippet auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core ac-ispell auto-complete popup which-key use-package org-plus-contrib hydra font-lock+ exec-path-from-shell evil goto-chg undo-tree diminish bind-map bind-key async))))
+    (yasnippet-snippets string-inflection proof-general org-download nix-mode impatient-mode helm-company fish-mode evil-matchit evil-args editorconfig dante lcr counsel-projectile counsel ivy iedit smartparens flycheck helm helm-core markdown-mode alert projectile magit ghub dash org-plus-contrib yaml-mode ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill toc-org tagedit symon swiper spaceline-all-the-icons smeargle slim-mode scss-mode sass-mode restart-emacs rainbow-delimiters pug-mode popwin persp-mode pcre2el password-generator paradox ox-reveal ox-gfm overseer orgit org-projectile org-present org-pomodoro org-mime org-bullets org-brain open-junk-file nix-sandbox neotree nameless mwim move-text monokai-theme mmm-mode material-theme markdown-toc magit-svn magit-gitflow macrostep lorem-ipsum log4e livid-mode linum-relative link-hint less-css-mode json-navigator json-mode js2-refactor js-doc insert-shebang indent-guide hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-css-scss helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gnuplot gnu-apl-mode gntp gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gh-md fuzzy font-lock+ flycheck-pos-tip flycheck-haskell flycheck-bashate flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-anzu eval-sexp-fu erlang emmet-mode elisp-slime-nav dumb-jump dotenv-mode diminish define-word company-web company-tern company-statistics company-shell company-ghci company-ghc company-coq company-cabal column-enforce-mode cmm-mode clean-aindent-mode centered-cursor-mode auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent ace-window ace-link ace-jump-helm-line ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
