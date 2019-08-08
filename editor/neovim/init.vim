@@ -19,15 +19,16 @@ let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 
 call plug#begin('~/.nvim/plugged')
 
+Plug 'LnL7/vim-nix'
 Plug 'benekastah/neomake'
 Plug 'mattn/emmet-vim'
 Plug 'neovimhaskell/haskell-vim'
 Plug 'kien/ctrlp.vim'
 Plug 'kchmck/vim-coffee-script'
-Plug 'derekwyatt/vim-scala'
 Plug 'Shougo/deoplete.nvim'
 Plug 'bling/vim-airline'
 Plug 'scrooloose/nerdtree'
+Plug 'tpope/vim-surround'
 
 " Te he
 Plug 'alex-ren/org.ats-lang.toolats', { 'rtp': 'org.ats-lang.toolats.vim' }
@@ -97,8 +98,8 @@ set completeopt=longest,menuone
 
 " Prettiness
 " set background = "dark"
-colorscheme molokai
-let g:molokai_original = 1
+" colorscheme molokai
+" let g:molokai_original = 1
 
 let mapleader = ","
          
