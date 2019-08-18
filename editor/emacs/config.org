@@ -26,6 +26,8 @@ Set out GC threshold to 50Mb instead of 800Kb
 (global-hl-line-mode t)
 ;; Column numbers too
 (column-number-mode t)
+;; Default fill-width
+(setq-default fill-column 90)
 #+END_SRC
 * Diminish and Delight
 ** Diminish

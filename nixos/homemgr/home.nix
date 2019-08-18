@@ -7,6 +7,7 @@
     ./development.nix
     ./polybar.nix
     ./dunst.nix
+    ./services/lorri.nix
   ];
 
   # Misc apps etc
@@ -93,6 +94,17 @@
   programs.emacs.enable = true;
   programs.neovim.enable = true;
 
+  programs.kakoune = {
+    enable = true;
+    config = {
+      indentWidth = 2;
+    };
+  };
+
+  home.sessionVariables = {
+    EDITOR = "nvim";
+  };
+
   programs.direnv = {
     enable = true;
     enableFishIntegration = true;
@@ -105,6 +117,8 @@
     longitude  = "153.0251";
     latitude = "-27.4698";
   };
+
+  services.lorri.enable = true;
 
   services.xscreensaver = {
     enable = true;
