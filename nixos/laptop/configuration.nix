@@ -29,15 +29,25 @@
   # Set your time zone.
   time.timeZone = "Australia/Brisbane";
 
+  # programs.firejail = {
+  #   enable = true;
+  #   wrappedBinaries = {
+  #     spotify = "${pkgs.lib.getBin pkgs.unstable.spotify}/bin/spotify";
+  #   };
+  # };
+
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
     # Misc system level things
+    unstable.bolt
+    pkgs.hicolor-icon-theme
     pkgs.shellcheck
     pkgs.jq
     pkgs.alsaUtils
     pkgs.arandr
     pkgs.networkmanagerapplet
+    pkgs.redshift
     upower
     powertop
     evince
@@ -48,39 +58,38 @@
     tree
     rxvt_unicode-with-plugins
     xorg.xbacklight
-    nix-repl
     silver-searcher
     sudo
     htop
     dmenu
     keepassx
     iosevka
+    mononoki
     keychain
     pkgs.gitAndTools.hub
-    pkgs.crawlTiles
     pkgs.xscreensaver
-    pkgs.stow
     pkgs.nix-prefetch-git
     pkgs.pandoc
+    unstable.direnv
     # omg unfree!
     unstable.spotify
-    unstable.steam
-    unstable.steam-run
+    # unstable.steam
+    # unstable.steam-run
     # Wowsers Bowsers
-    pkgs.chromium
-    pkgs.firefox
-    # Right in the inbox
-    pkgs.thunderbird
+    unstable.chromium
+    unstable.firefox
     # Yubikey!
     unstable.yubioath-desktop
     pkgs.networkmanager_openconnect
+    # Sigh, fragmentation
+    unstable.slack
+    unstable.discord
   ] ++ [
     # Editor shenanigans
     emacs
     emacsPackages.proofgeneral
 
     unstable.neovim
-    unstable.python35Packages.neovim
 
     ed
     plan9port
@@ -92,18 +101,10 @@
     # avrlibc
   ] ++ [
     # Bonus language round!
-    unstable.tlaplus
-    unstable.erlang
     unstable.ats2
-    unstable.gnuapl
     unstable.gcc
     unstable.coq
-    unstable.coqPackages.ssreflect
-    unstable.racket
-    unstable.mercury
-    unstable.j
     unstable.gnumake
-    # Eww
     unstable.python3
   ] ++ [
     # Haskell Packages
@@ -114,12 +115,15 @@
     unstable.haskellPackages.stylish-haskell
     unstable.haskellPackages.hoogle
 
-    haskellPackages.doctest
-    haskellPackages.ghc
+    unstable.haskellPackages.doctest
+    unstable.haskellPackages.ghc
+    unstable.haskellPackages.ShellCheck
+    (pkgs.haskell.lib.justStaticExecutables haskellPackages.haskell-ci)
 
     # XMonad Haskell type things
-    # unstable.haskellPackages.taffybar
-    unstable.haskellPackages.xmobar
+    haskellPackages.taffybar
+    haskellPackages.gtk-sni-tray
+    haskellPackages.status-notifier-item
   ];
 
   # Fishy fishy
@@ -129,9 +133,6 @@
   programs.adb.enable = true;
 
   # List services that you want to enable:
-
-  # Emacs!
-  # services.emacs.enable = true;
 
   # Yubi!
   services.pcscd.enable = true;
@@ -147,8 +148,6 @@
       pulseSupport = true;
     };
   };
-  # virtualisation.virtualbox.enableExtensionPack = true;
-
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
@@ -162,18 +161,21 @@
   services.upower.enable = true;
   powerManagement.enable = true;
 
+  programs.ssh.startAgent = true;
+
   # ERMAGERD PERSTGREEZ
   # services.postgresql.enable = true;
   # services.postgresql.package = pkgs.postgresql;
 
-  # Enable core fonts - requires allowNonFree
-  # fonts.enableCoreFonts = true;
   fonts = {
     fonts = [
       pkgs.iosevka
       pkgs.hasklig
       pkgs.source-code-pro
       pkgs.fira-code
+      pkgs.mononoki
+      pkgs.fantasque-sans-mono
+      pkgs.fixedsys-excelsior
     ];
     fontconfig = {
       enable = true;
@@ -191,23 +193,27 @@
     desktopManager.default = "none";
     desktopManager.xterm.enable = false;
 
-    xrandrHeads = [ "eDP1" "DP1-1" ];
-    resolutions = [ { x = 2560; y = 1440; } { x = 1920; y = 1200; } ];
+    xrandrHeads = [ "eDP-1" "HDMI-1" ];
+    # resolutions = [ { x = 2560; y = 1440; } { x = 1920; y = 1200; } ];
+    resolutions = [ { x = 1920; y = 1080; } { x = 1920; y = 1200; } ];
 
-    startOpenSSHAgent = true;
     displayManager = {
       lightdm.enable = true;
     };
+
     windowManager.default = "xmonad";
     windowManager.xmonad = {
       enable = true;
       enableContribAndExtras = true;
+      extraPackages = haskPkgs: [
+        haskPkgs.taffybar
+      ];
     };
     displayManager.sessionCommands =  ''
-       xrdb "${pkgs.writeText  "xrdb.conf" ''
-          URxvt.font:                 xft:Iosevka:size=10
-          XTerm*faceName:             xft:Iosevka:size=10
-          XTerm*utf8:                 2
+    xrdb "${pkgs.writeText  "xrdb.conf" ''
+       URxvt.font:                 xft:Iosevka:size=10
+       XTerm*faceName:             xft:Iosevka:size=10
+       XTerm*utf8:                 2
 
     ! special
     *.foreground:               \#f8f8f2
@@ -279,6 +285,61 @@
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
+  services.gnome3.at-spi2-core.enable = true;
+
+  services.udev.packages = [ pkgs.unstable.bolt ];
+  systemd.packages = [ pkgs.unstable.bolt ];
+
+  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.support32Bit = true;
+
+  # Enable some user level services
+  systemd.user.services = {
+    status-notifier-watcher = {
+      enable = true;
+      description= "status notifier watcher";
+      wantedBy = [ "default.target" ];
+      before = [ "taffybar.service" ];
+
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${pkgs.haskellPackages.status-notifier-item}/bin/status-notifier-watcher";
+      };
+    };
+
+    # nm-applet = {
+    #   enable = true;
+    #   description = "network manager applet";
+    #   wants = [ "status-notifier-watcher.service" ];
+    #   after = [ "status-notifier-watcher.service" "taffybar.service" ];
+    #   serviceConfig = {
+    #     Type = "simple";
+    #     ExecStart = "${pkgs.networkmanagerapplet}/bin/nm-applet --sm-disable --indicator";
+    #   };
+    # };
+
+    taffybar = {
+      enable = true;
+      description = "Taffybar";
+      wants = [ "status-notifier-watcher.service" ];
+      after = [ "status-notifier-watcher.service" ];
+
+      restartIfChanged = true;
+
+      environment.XDG_DATA_HOME = "/home/manky/.local/share";
+      environment.XDG_DATA_DIRS = "/run/opengl-driver/share:/run/opengl-driver-32/share:/home/manky/.nix-profile/share:/nix/var/nix/profiles/default/share:/run/current-system/sw/share:/etc/profiles/per-user/manky/share";
+      environment.GDK_PIXBUF_MODULE_FILE = "${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache";
+
+      serviceConfig = {
+        Type="simple";
+        ExecStart="${pkgs.haskellPackages.taffybar}/bin/taffybar";
+        Restart="always";
+        RestartSec=3;
+        NotifyAccess="all";
+      };
+    };
+
+  };
   # Hardware changes to run Steam
   hardware.opengl = {
     enable = true;
@@ -289,7 +350,7 @@
   fileSystems."/mnt/machines" = {
     device = "//192.168.1.4/machines";
     fsType = "cifs";
-    options = [ "username=no" "password=okay" "x-systemd.automount" "noauto" ];
+    options = [ "username=machines" "password=machines" "x-systemd.automount" "noauto" ];
   };
 
   # hardware.pulseaudio.enable = true;
@@ -314,9 +375,10 @@
 
   nixpkgs.config = {
     allowUnfree = true;
-      # Create an alias for the unstable channel
+
+    # Create an alias for the unstable channel
     packageOverrides = pkgs: {
-      unstable = import <nixos-unstable> {
+      unstable = import <nixpkgs-unstable> {
         # pass the nixpkgs config to the unstable alias
         # to ensure `allowUnfree = true;` is propagated:
         config = config.nixpkgs.config;
@@ -324,16 +386,27 @@
     };
   };
 
+  nix.trustedUsers = [ "root" "manky" ];
+
   nix.binaryCaches = [
     # Added from https://github.com/reflex-frp/reflex-platform/blob/develop/notes/NixOS.md
     "https://cache.nixos.org"
     "https://nixcache.reflex-frp.org"
+    "https://hydra.qfpl.io"
+
+    # Added from cachix
+    "https://hie-nix.cachix.org"
+
+    # IOHK Binary cache
+    "https://hydra.iohk.io"
   ];
   nix.binaryCachePublicKeys = [
     "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+    "qfpl.io:xME0cdnyFcOlMD1nwmn6VrkkGgDNLLpMXoMYl58bz5g="
+    "hie-nix.cachix.org-1:EjBSHzF6VmDnzqlldGXbi0RM3HdjfTU3yDRi9Pd0jTY="
+    "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
   ];
 
   # The NixOS release to be compatible with for stateful data such as databases.
-  system.stateVersion = "18.03";
-
+  system.stateVersion = "19.03";
 }
