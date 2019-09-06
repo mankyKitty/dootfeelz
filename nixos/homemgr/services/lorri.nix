@@ -3,10 +3,11 @@
 with lib;
 
 let
+  lorriTar = "https://github.com/target/lorri/archive/rolling-release.tar.gz";
   cfg = config.services.lorri;
 
   lorri = import (fetchTarball {
-    url = "https://github.com/target/lorri/archive/rolling-release.tar.gz";
+    url = lorriTar;
   }) { };
 in
 
@@ -15,14 +16,14 @@ in
 
   options = {
     services.lorri = {
-	  enable = mkEnableOption "lorri setup";
+      enable = mkEnableOption "lorri setup";
 
       package = mkOption {
         type = types.package;
         default = lorri;
         defaultText = ''
           import (fetchTarball {
-            url = "https://github.com/target/lorri/archive/rolling-release.tar.gz";
+            url = lorriTar; 
           }) { }
         '';
         description = ''

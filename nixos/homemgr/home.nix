@@ -97,12 +97,17 @@
   programs.kakoune = {
     enable = true;
     config = {
+      colorScheme = "lucius";
+      numberLines.enable = true;
       indentWidth = 2;
+      ui = {
+        enableMouse = true;
+      };
     };
   };
 
   home.sessionVariables = {
-    EDITOR = "nvim";
+    EDITOR = "kak";
   };
 
   programs.direnv = {
