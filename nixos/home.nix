@@ -8,7 +8,6 @@
     ./polybar.nix
     ./dunst.nix
     ./services/lorri.nix
-    ./pkgs/press-start-2p-font
   ];
 
   # Misc apps etc
