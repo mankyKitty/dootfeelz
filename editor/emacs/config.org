@@ -134,7 +134,8 @@ With hopefully less RSI..
 (menu-bar-mode   -1)
 (setq-default inhibit-startup-screen t)
 ;; (setq default-frame-alist '((font . "-ADBO-Source Code Pro-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")))
-(setq default-frame-alist '((font . "-POOP-Fixedsys Excelsior 3.01-normal-normal-normal-*-16-*-*-*-*-0-iso10646-1")))
+;; (setq default-frame-alist '((font . "-POOP-Fixedsys Excelsior 3.01-normal-normal-normal-*-16-*-*-*-*-0-iso10646-1")))
+(setq default-frame-alist '((font . "-V.R.-PxPlus IBM VGA9-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")))
 #+END_SRC
 * Async?!
   Needed by =helm= and might be useful anyway.
