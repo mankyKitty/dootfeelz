@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 {
+  nixpkgs.config.allowUnfree = true;
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
@@ -8,7 +10,7 @@
     ./polybar.nix
     ./dunst.nix
     ./services/lorri.nix
-    ./pkgs/press-start-2p-font
+    # ./pkgs/press-start-2p-font
   ];
 
   # Misc apps etc
@@ -36,6 +38,9 @@
     evince
     pandoc
     shutter
+    thunderbird
+    zoom-us
+
 
     # ssshhhhh
     keepassx
@@ -51,6 +56,7 @@
 
     # omg unfree!
     spotify
+    brave
 
     # Sigh, fragmentation
     slack
@@ -133,6 +139,16 @@
     };
   };
 
+  programs.git = {
+    enable = true;
+    userEmail = "sean.chalmers@obsidian.systems";
+    userName = "Sean Chalmers";
+    ignores = [
+      "dist/"
+      "dist-newstyle/"
+    ];
+  };
+
   # Shamelessly stolen from benkoleras config for copy/paste great justice.
   programs.urxvt = {
     enable = true;
@@ -141,7 +157,7 @@
       "Shift-Control-C" = "eval:selection_to_clipboard";
       "Shift-Control-V" = "eval:paste_clipboard";
     };
-    transparent = true;
+    # transparent = true;
     shading = 50;
   };
 
@@ -158,7 +174,7 @@
       extraPackages = hpkgs: with hpkgs; [
         xmonad-contrib
       ];
-      config = ~/dotfiles/xmonad/xmonad.hs;
+      config = ~/repos/dootfeelz/xmonad/xmonad.hs;
     };
   };
 

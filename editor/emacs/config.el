@@ -1,51 +1,29 @@
-#+TITLE: My Emacs Config (omg)
-#+AUTHOR: Sean Chalmers
-#+EMAIL: sclhiannan@gmail.com
-#+OPTIONS: num:nil
-
-* Sanity settings
-Disable tabs, we're not monsters
-#+BEGIN_SRC emacs-lisp
 (setq-default indent-tabs-mode nil)
-#+END_SRC
-Set a global tab width to two spaces
-#+BEGIN_SRC emacs-lisp
+
 (setq-default tab-width 2)
-#+END_SRC
-Move our backups out of sight
-#+BEGIN_SRC emacs-lisp
+
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
-#+END_SRC
-Set out GC threshold to 50Mb instead of 800Kb
-#+BEGIN_SRC emacs-lisp
+
 (setq gc-cons-threshold 50000000)
-#+END_SRC
-#+BEGIN_SRC emacs-lisp
+
 ;; Enable line highlight mode, because I find it useful.
 (global-hl-line-mode t)
 ;; Column numbers too
 (column-number-mode t)
 ;; Default fill-width
 (setq-default fill-column 90)
-#+END_SRC
-* Diminish and Delight
-** Diminish
-#+BEGIN_SRC emacs-lisp
+
 (use-package diminish
   :ensure t
   :config
   (diminish 'undo-tree-mode "UT")
 )
-#+END_SRC
-** Delight
-#+BEGIN_SRC emacs-lisp
+
 (use-package delight
   :ensure t
 )
-#+END_SRC
-* =which-key= for discoverability
-#+BEGIN_SRC emacs-lisp
+
 (setq which-key-enable-extended-define-key t)
 (use-package which-key
   :ensure t
@@ -61,12 +39,7 @@ Set out GC threshold to 50Mb instead of 800Kb
 (defun manky/add-leader-prefix-name (k n)
   "Using the current evil-leader key, define a name for which-key to display"
   (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " " k) n))
-#+END_SRC
 
-* Evil mode for great justice
-With hopefully less RSI..
-
-#+BEGIN_SRC emacs-lisp
 (use-package evil
   :ensure t
   :config
@@ -107,27 +80,23 @@ With hopefully less RSI..
   ;;   (powerline-evil-vim-color-theme))
   (evil-mode 1)
 )
-#+END_SRC
-* Avy for jumping
-  #+BEGIN_SRC emacs-lisp
-  (use-package avy
-    :ensure t
-    :config
-    (manky/add-leader-prefix-name "j" "avy")
-    (evil-leader/set-key
-      "j c" 'avy-goto-char
-      "j C" 'avy-goto-char-2
-      "j t" 'avy-goto-char-timer
-      "j l" 'avy-goto-line
-      "j w" 'avy-goto-word-1
-      "j W" 'avy-goto-word-0
-      "j o" 'avy-org-goto-heading-timer
-      "j R" 'avy-org-refile-as-child
-    )
+
+(use-package avy
+  :ensure t
+  :config
+  (manky/add-leader-prefix-name "j" "avy")
+  (evil-leader/set-key
+    "j c" 'avy-goto-char
+    "j C" 'avy-goto-char-2
+    "j t" 'avy-goto-char-timer
+    "j l" 'avy-goto-line
+    "j w" 'avy-goto-word-1
+    "j W" 'avy-goto-word-0
+    "j o" 'avy-org-goto-heading-timer
+    "j R" 'avy-org-refile-as-child
   )
-  #+END_SRC
-* Clean up the Emacs UI
-#+BEGIN_SRC emacs-lisp
+)
+
 (scroll-bar-mode -1)
 (tool-bar-mode   -1)
 (tooltip-mode    -1)
@@ -136,24 +105,17 @@ With hopefully less RSI..
 ;; (setq default-frame-alist '((font . "-ADBO-Source Code Pro-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")))
 ;; (setq default-frame-alist '((font . "-POOP-Fixedsys Excelsior 3.01-normal-normal-normal-*-16-*-*-*-*-0-iso10646-1")))
 (setq default-frame-alist '((font . "-V.R.-PxPlus IBM VGA9-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")))
-#+END_SRC
-* Async?!
-  Needed by =helm= and might be useful anyway.
-#+BEGIN_SRC emacs-lisp
+
 (use-package async
   :ensure t
   :config
   (dired-async-mode 1)
 )
-#+END_SRC
-* Popups
-#+BEGIN_SRC emacs-lisp
+
 (use-package popup
   :ensure t
 )
-#+END_SRC
-* Helm for fuzzy justice
-  #+BEGIN_SRC emacs-lisp
+
 (use-package helm
   :ensure t
   :diminish ""
@@ -163,17 +125,12 @@ With hopefully less RSI..
   :config
   (helm-mode 1)
 )
-  #+END_SRC
-** Helm ls git
-  #+BEGIN_SRC emacs-lisp
-  (use-package helm-ls-git
-    :ensure t
-    :bind (("C-x C-d" . helm-browse-project))
-  )
-  #+END_SRC
-* Projectile for project goodness
-** Projectile
-#+BEGIN_SRC emacs-lisp
+
+(use-package helm-ls-git
+  :ensure t
+  :bind (("C-x C-d" . helm-browse-project))
+)
+
 (use-package projectile
   :ensure t
   :after (helm)
@@ -186,9 +143,7 @@ With hopefully less RSI..
   ;;   "p" 'projectile-command-map
   ;;   )
 )
-#+END_SRC
-** Helm projectile for fuzzy projects
-#+BEGIN_SRC emacs-lisp
+
 (use-package helm-projectile
   :ensure t
   :config
@@ -206,11 +161,7 @@ With hopefully less RSI..
     ;; helm-projectile-recentf
   )
 )
-#+END_SRC
-* Minor Text/Layout utils
-** aggressive-indent
-Not in use at the moment
-#+BEGIN_SRC emacs-lisp
+
 (use-package aggressive-indent
   :ensure t
   :config
@@ -218,18 +169,13 @@ Not in use at the moment
     "t a" 'aggressive-indent-mode
   )
 )
-#+END_SRC
 
-** rainbow-delimiters
-#+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
   :ensure t
   ;; There is no global mode, so...
   :hook (prog-mode-hook . rainbow-delimiters-mode)
 )
-#+END_SRC
-** smartparens-config
-#+BEGIN_SRC emacs-lisp
+
 (use-package smartparens
   :ensure t
   :diminish (smartparens-mode . "()")
@@ -238,10 +184,7 @@ Not in use at the moment
   (smartparens-global-mode t)
   (show-paren-mode t)
 )
-#+END_SRC
-#+END_SRC
-* Git!
-#+BEGIN_SRC emacs-lisp
+
 (use-package magit
   :ensure t
   :diminish magit-auto-revert-mode
@@ -250,35 +193,25 @@ Not in use at the moment
   (evil-leader/set-key
     "g s" 'magit-status)
 )
-#+END_SRC
-* Direnv
-  #+BEGIN_SRC emacs-lisp
+
 (use-package direnv
   :ensure t
   :config
   (direnv-mode))
-  #+END_SRC
-* Emmet for xml laziness
-  Emmet coding is a life saver when you just have to write XML type things.
-  #+BEGIN_SRC emacs-lisp
-  (use-package emmet-mode
-    :ensure t
-    :init
-    (add-hook 'sgml-mode-hook 'emmet-mode) ;; Autostart on markup modes
-    (add-hook 'css-mode-hook 'emmet-mode) ;; Emmet has CSS prefix helpers
-    (setq emmet-move-cursor-between-quotes t) ;; Move to between the inserted tags
 
-    ;; Not sure if I need this one yet, but I'll know it when I hit it
-    ;; (setq emmet-self-closing-tag-style " /") ;; default "/"
-    ;; only " /", "/" and "" are valid.
-    ;; eg. <meta />, <meta/>, <meta>
-  )
-  #+END_SRC
+(use-package emmet-mode
+  :ensure t
+  :init
+  (add-hook 'sgml-mode-hook 'emmet-mode) ;; Autostart on markup modes
+  (add-hook 'css-mode-hook 'emmet-mode) ;; Emmet has CSS prefix helpers
+  (setq emmet-move-cursor-between-quotes t) ;; Move to between the inserted tags
 
-* Nix/OS integration & tools
-** Nix file mode
-Gotta get that highlighting...
-#+BEGIN_SRC emacs-lisp
+  ;; Not sure if I need this one yet, but I'll know it when I hit it
+  ;; (setq emmet-self-closing-tag-style " /") ;; default "/"
+  ;; only " /", "/" and "" are valid.
+  ;; eg. <meta />, <meta/>, <meta>
+)
+
 (use-package nix-mode
   :ensure t
   :mode ("\\.nix\\'" . 'nix-mode)
@@ -291,17 +224,12 @@ Gotta get that highlighting...
 
   (add-hook 'nix-mode-hook 'manky/nix-indent)
   )
-#+END_SRC
-** Nix sandbox
-#+BEGIN_SRC emacs-lisp
+
 (use-package nix-sandbox
   :ensure t
   :after nix-mode
   )
-#+END_SRC
-* Language Modes!! OMG
-** Haskell
-#+BEGIN_SRC emacs-lisp
+
 (use-package haskell-mode
   :ensure t
   :after flycheck
@@ -323,11 +251,7 @@ Gotta get that highlighting...
                          company-backends))))
 
 )
-#+END_SRC
 
-*** Structured Haskell (omg)
-    Just ... doesn't work. :/
-#+BEGIN_SRC emacs-lisp
 ;; (use-package shm
 ;;   :load-path "~/repos/structured-haskell-mode/elisp/"
 ;;   :hook (haskell-mode . structured-haskell-mode)
@@ -336,37 +260,19 @@ Gotta get that highlighting...
 ;;   :config
 ;;   (haskell-indentation-mode -1)
 ;; )
-#+END_SRC
-** JSON
-*heavy sigh*
-#+BEGIN_SRC emacs-lisp
+
 (use-package json-mode :ensure t)
-#+END_SRC
-** CSS
-#+BEGIN_SRC emacs-lisp
+
 (use-package css-mode :ensure t)
-#+END_SRC
-** Markdown
-#+BEGIN_SRC emacs-lisp
+
 (use-package markdown-mode
   :ensure t
 )
-#+END_SRC
-** GLSL
-#+BEGIN_SRC emacs-lisp
+
 (use-package glsl-mode
   :ensure t
 )
-#+END_SRC
-* Checking & Linting
-We need to poke some =.dirlocal= powers to make dante really shine
-Setup the dante project values according to the proposed layout for
-shared common code, i.e
 
-- =dante-project-root= ~ <immediate folder with a shell.nix>
-- =dante-repl-command-line= ~ cabal new3-repl <dante-target> --buildir=dist/dante
-
-#+BEGIN_SRC emacs-lisp
 (defun manky/set-dante-locals ()
   (make-local-variable 'dante-project-root)
   (make-local-variable 'dante-repl-command-line)
@@ -376,10 +282,7 @@ shared common code, i.e
              (concat "cabal new-repl " dante-target " --builddir=dist/dante")))
         (setq dante-repl-command-line (list "nix-shell" "--run" cabal-cmd)))
     nil))
-#+END_SRC
 
-** Flycheck
-#+BEGIN_SRC emacs-lisp
 (use-package flycheck
   :ensure t
   :init
@@ -395,10 +298,7 @@ shared common code, i.e
         flycheck-executable-find
         (lambda (cmd) (nix-executable-find (nix-current-sandbox) cmd)))
 )
-#+END_SRC
 
-** Dante (Haskell)
-#+BEGIN_SRC emacs-lisp
 (use-package dante
   :hook haskell-mode
   :ensure t
@@ -419,10 +319,6 @@ shared common code, i.e
   (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " r t") "insert type")
 )
 
-#+END_SRC
-** Attrap
-Try to fix the issue at the cursor
-#+BEGIN_SRC emacs-lisp
 (use-package attrap
   :ensure t
   :init
@@ -430,81 +326,48 @@ Try to fix the issue at the cursor
   (evil-leader/set-key-for-mode 'haskell-mode
     "r f" 'attrap-attrap)
   )
-#+END_SRC
-* Complete Anything (company)
-  #+BEGIN_SRC emacs-lisp
-  (use-package company
-    :ensure t
-    :diminish " C"
-    :config
-    (add-hook 'after-init-hook 'global-company-mode)
-  )
-  #+END_SRC
-* Smart Mode Line
-Clean up the mode line a bit as it gets a bit busy by default.
-#+BEGIN_SRC emacs-lisp
+
+(use-package company
+  :ensure t
+  :diminish " C"
+  :config
+  (add-hook 'after-init-hook 'global-company-mode)
+)
+
 (use-package smart-mode-line
   :ensure t
   :config
   (add-hook 'after-init-hook 'sml/setup)
 )
-#+END_SRC
-* Binding of the Keys
-  All misc key bindings are going to be placed here. I might be able to
-  keep things neat with heavy use of =org-babel= tangling.
 
-** Set general prefixes
-#+BEGIN_SRC emacs-lisp
 (manky/add-leader-prefix-name "x" "text") ;; spacemacs muscle memory
 (manky/add-leader-prefix-name "f" "file")
 (manky/add-leader-prefix-name "b" "buffer")
 (which-key-add-key-based-replacements "SPC TAB" "Prev buffer")
-#+END_SRC
-** Everything that has a beginning
-#+BEGIN_SRC emacs-lisp
+
 ;; This is just the beginning
 (evil-leader/set-key
-#+END_SRC
 
-** Text
-   #+BEGIN_SRC emacs-lisp
-   "x a r" 'align-regexp
+"x a r" 'align-regexp
 
-   #+END_SRC
+"f s" 'save-buffer
 
-** File
-   #+BEGIN_SRC emacs-lisp
-   "f s" 'save-buffer
+"b d" 'kill-this-buffer
+"b b" 'switch-to-buffer
+"TAB" 'mode-line-other-buffer
 
-   #+END_SRC
-
-** Buffer
-   #+BEGIN_SRC emacs-lisp
-   "b d" 'kill-this-buffer
-   "b b" 'switch-to-buffer
-   "TAB" 'mode-line-other-buffer
-
-   #+END_SRC
-
-** ...has an end, Neo.
-#+BEGIN_SRC emacs-lisp
 )
 ;; This is just the end
-#+END_SRC
 
-* Org
-  #+BEGIN_SRC emacs-lisp
-  (use-package org-plus-contrib
-    :mode ("\\.org\\'" . org-mode)
-    :ensure t
-    :pin org
-    :config
-  )
-  (use-package ox-reveal
-    ;; Cloned from github https://github.com/yjwen/org-reveal.git
-    :load-path "cloned/org-reveal"
-    :config
-    (require 'ox-reveal)
-  )
-
-  #+END_SRC
+(use-package org-plus-contrib
+  :mode ("\\.org\\'" . org-mode)
+  :ensure t
+  :pin org
+  :config
+)
+(use-package ox-reveal
+  ;; Cloned from github https://github.com/yjwen/org-reveal.git
+  :load-path "cloned/org-reveal"
+  :config
+  (require 'ox-reveal)
+)
