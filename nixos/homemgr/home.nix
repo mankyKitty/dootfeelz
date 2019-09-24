@@ -16,6 +16,7 @@
   # Misc apps etc
   home.packages = with pkgs; [
     # system
+    cacert
     sudo
     dmenu
     alsaUtils
@@ -40,7 +41,6 @@
     shutter
     thunderbird
     zoom-us
-
 
     # ssshhhhh
     keepassx
