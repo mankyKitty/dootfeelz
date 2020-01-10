@@ -306,6 +306,7 @@ in
     };
   };
 
+  home.file.".emacs.d/init.el".source = ~/repos/dootfeelz/editor/emacs/init.el;
   services.emacs.enable = true;
   programs.emacs = {
     enable = true;
