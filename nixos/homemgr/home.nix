@@ -28,6 +28,12 @@ in
       (import ./overlays/kak-fzf)
       (import ./overlays/lorri)
       (import ./overlays/kakoune)
+      (import ./overlays/synthwave-x-fluoromachine)
+      (self: super: {
+        vscode = super.vscode.overrideAttrs (old: {
+          patches = [ ./patches/add-synthwave-css.patch ];
+        });
+      })
     ];
 
   # Let Home Manager install and manage itself.
@@ -73,6 +79,7 @@ in
     lorri
     pkgs-unstable.universal-ctags
     pkgs-unstable.entr
+    pkgs-unstable.cool-retro-term
 
     # apps
     evince
@@ -274,10 +281,17 @@ in
           sha256 = "0fb71cbjx1pyrjhi5ak29wj23b874b5hqjbh68njs61vkr3jlf1j";
         }
         {
-          name = "ctags-support";
-          publisher = "jaydenlin";
-          version = "1.0.19";
-          sha256 = "1rp98gv7hgx5phpnyxw81m4sx5ak45z5k81b6wsxj5zacr1wn7pm";
+          name = "vscode-custom-css";
+          publisher = "be5invis";
+          version = "3.0.9";
+          sha256 = "05nq7nwl1jrxxfbj7s48lka1kw1yn632paxk30q4ksjnzr6bavjk";
+        }
+        # yasssss webrender/synthwave-vscode-x-fluoromachine 0.0.9
+        {
+          name = "synthwave-x-fluoromachine";
+          publisher = "webrender";
+          version = "0.0.9";
+          sha256 = "1d43gfwja7nlfvrx1gb912vkv4p59g10agamlbkcy3sfv1kp9agx";
         }
       ];
     userSettings = {
@@ -288,7 +302,9 @@ in
       "files.trimTrailingWhitespace" = true;
       "telemetry.enableCrashReporter" = false;
       "workbench.iconTheme" = "vs-minimal";
-      "workbench.colorTheme" = "Monokai";
+      "workbench.colorTheme" = "Synthwave x Fluoromachine";
+      "vscode_custom_css.imports" = ["file://${pkgs.vscode-theme-synthwave}/synthwave-x-fluoromachine.css"];
+      "vscode_custom_css.policy" = true;
     };
   };
 
@@ -337,6 +353,7 @@ in
       "*dist"
       "*dist-newstyle"
       ".ghc-environment*"
+      "cabal.project.local*"
     ];
   };
 
