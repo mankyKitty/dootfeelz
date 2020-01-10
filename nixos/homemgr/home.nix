@@ -1,6 +1,34 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+let
+  from-home = dir: ./repos/dootfeelz/nixos/homemgr + dir;
+  pkgs-unstable = import <nixpkgs-unstable> {};
+
+  postman780 = import ./packages/postman;
+
+  isKakFile = name: type: type == "regular" && lib.hasSuffix ".kak" name;
+  isDir     = name: type: type == "directory";
+  allKakFiles = (dir:
+    let fullPath = p: "${dir}/${p}";
+        files = builtins.readDir dir;
+        subdirs  = lib.concatMap (p: allKakFiles (fullPath p)) (lib.attrNames (lib.filterAttrs isDir files));
+        subfiles = builtins.map fullPath (lib.attrNames (lib.filterAttrs isKakFile files));
+    # This makes sure the most shallow files are loaded first
+    in (subfiles ++ subdirs)
+  );
+  kakImport = name: ''source "${name}"'';
+  allKakImports = dir: builtins.concatStringsSep "\n" (map kakImport (allKakFiles dir));
+in
 {
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+  };
+
+  nixpkgs.overlays =
+    [ (import ./overlays/stevenblack-hosts.nix)
+      (import ./overlays/kak-fzf)
+      (import ./overlays/lorri)
+      (import ./overlays/kakoune)
+    ];
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -9,13 +37,12 @@
     ./development.nix
     ./polybar.nix
     ./dunst.nix
-    ./services/lorri.nix
-    # ./pkgs/press-start-2p-font
   ];
 
   # Misc apps etc
   home.packages = with pkgs; [
     # system
+    file
     cacert
     sudo
     dmenu
@@ -25,15 +52,27 @@
     xorg.xbacklight
     networkmanagerapplet
     ed
+    stevenblack-hosts
+    cachix
+
+    # editor shenanigans
+    kakoune
+    # pkgs-unstable.kak-lsp
+
+    # languages
+    pkgs-unstable.mercury
 
     # turtle power
     shellcheck
-    jq
     wget
     gawk
     which
     tree
-    silver-searcher
+    html2text
+    pkgs-unstable.silver-searcher
+    lorri
+    pkgs-unstable.universal-ctags
+    pkgs-unstable.entr
 
     # apps
     evince
@@ -41,10 +80,11 @@
     shutter
     thunderbird
     zoom-us
-
-    # ssshhhhh
-    keepassx
-    keychain
+    signal-desktop
+    krita
+    gnome3.pomodoro
+    libreoffice
+    pkgs-unstable.postman
 
     # fonts
     iosevka
@@ -56,13 +96,11 @@
 
     # omg unfree!
     spotify
-    brave
-
-    # Sigh, fragmentation
-    slack
-    discord
+    epiphany
+    pkgs-unstable.discord
   ];
 
+  programs.jq.enable = true;
   programs.htop.enable = true;
 
   programs.fish = {
@@ -92,29 +130,177 @@
     end
     '';
     shellAliases = {
+      emacs = "emacsclient -nc";
       ns = "nix-shell $argv --command fish";
+      gs = "git status";
+      ob-standup = "zoom-us \"zoommtg://zoom-us/join?confno=9355149074\"";
     };
   };
 
-  programs.chromium.enable = true;
+  # home.file.".config/nvim/init.vim".source = ~/repos/dootfeelz/editor/neovim/init.vim;
 
-  programs.emacs.enable = true;
-  programs.neovim.enable = true;
+  programs.firefox.enable = true;
+  programs.chromium.enable = true;
+  programs.fzf.enable = true;
+
+  # Fix this to use a 'toTOML' generators
+  # home.file.".config/kak-lsp/kak-lsp.toml".text  = ''
+  #   snippet_support = false
+  #   verbosity = 2
+
+  #   # exit session if no requests were received during given period in seconds
+  #   # works only in unix sockets mode (-s/--session)
+  #   # set to 0 to disable
+  #   [server]
+  #   timeout = 1800 # seconds = 30 minutes
+
+  #   [language.haskell]
+  #   filetypes = ["haskell"]
+  #   roots = ["Setup.hs", "stack.yaml", "*.cabal"]
+  #   command = "hie-wrapper"
+  #   args = ["--lsp"]
+  # '';
 
   programs.kakoune = {
     enable = true;
     config = {
-      colorScheme = "lucius";
+      colorScheme = "gruvbox";
       numberLines.enable = true;
+      showWhitespace.enable = true;
+      tabStop = 2;
       indentWidth = 2;
       ui = {
         enableMouse = true;
+        assistant = "cat";
       };
+      keyMappings = [
+        { mode = "normal"; key = "'<c-p>'"; effect = ":fzf-mode<ret>"; }
+        { mode = "normal"; key = "'<c-l>'"; effect = ":enter-user-mode lsp<ret>"; }
+        { mode = "normal"; key = "'#'"; effect = ":comment-line<ret>"; }
+        { mode = "user"; key = "'p'"; effect = "!xsel --output --clipboard<ret>"; docstring = "paste (after) from clipboard"; }
+        { mode = "user"; key = "'P'"; effect = "<a-!>xsel --output --clipboard<ret>"; docstring = "paste (before) from clipboard"; }
+        { mode = "user"; key = "'y'"; effect = "<a-|>xsel --input --clipboard<ret>:echo copied selection to x11 clipboard<ret>"; docstring = "Yank to clipboard"; }
+
+        { mode = "user"; key = "'l'"; effect = ": lint-next-error<ret>"; docstring = "Go to next linting error"; }
+        { mode = "user"; key = "'L'"; effect = ": lint-previous-error<ret>"; docstring = "Go to previous linting error"; }
+        { mode = "user"; key = "'<a-l>'"; effect = ": lint-disable<ret>"; docstring = "Disable linting"; }
+      ];
     };
+    extraConfig = ''
+
+      ${allKakImports pkgs.kak-fzf}
+
+      # eval %sh{kak-lsp --kakoune -s $kak_session}
+      # hook global WinSetOption filetype=(haskell) %{
+      #   lsp-enable-window
+      # }
+
+      # Custom mercury mode, lets roll
+      source /home/manky/repos/adventofcode/mercury.kak
+
+      hook global InsertChar k %{ try %{
+        exec -draft hH <a-k>jk<ret> d
+        exec <esc>
+      }}
+
+      hook global BufCreate .*[.](hsc) %{
+          set-option buffer filetype haskell
+      }
+
+      hook global WinSetOption filetype=haskell %{
+        set-option window lintcmd 'hlint'
+        lint-enable
+
+        hook window BufWritePost %val{buffile} %{
+          lint
+        }
+      }
+
+      define-command mkdir %{ nop %sh{ mkdir -p $(dirname $kak_buffile) } }
+      set-option global grepcmd 'ag --column'
+      add-highlighter global/ show-matching
+      add-highlighter global/ show-whitespaces
+
+      def suspend-and-resume \
+          -params 1..2 \
+          -docstring 'suspend-and-resume <cli command> [<kak command after resume>]: backgrounds current kakoune client and runs specified cli command.  Upon exit of command the optional kak command is executed.' \
+          %{ evaluate-commands %sh{
+
+          # Note we are adding '&& fg' which resumes the kakoune client process after the cli command exits
+          cli_cmd="$1 && fg"
+          post_resume_cmd="$2"
+
+          # automation is different platform to platform
+          platform=$(uname -s)
+          case $platform in
+              Darwin)
+                  automate_cmd="sleep 0.01; osascript -e 'tell application \"System Events\" to keystroke \"$cli_cmd\\n\" '"
+                  kill_cmd="/bin/kill"
+                  break
+                  ;;
+              Linux)
+                  automate_cmd="sleep 0.2; xdotool type '$cli_cmd'; xdotool key Return"
+                  kill_cmd="/usr/bin/kill"
+                  break
+                  ;;
+          esac
+
+          # Uses platforms automation to schedule the typing of our cli command
+          nohup sh -c "$automate_cmd"  > /dev/null 2>&1 &
+          # Send kakoune client to the background
+          $kill_cmd -SIGTSTP $kak_client_pid
+
+          # ...At this point the kakoune client is paused until the " && fg " gets run in the $automate_cmd
+
+          # Upon resume, run the kak command is specified
+          if [ ! -z "$post_resume_cmd" ]; then
+              echo "$post_resume_cmd"
+          fi
+      }}
+    '';
+  };
+
+  programs.vscode = {
+    # package = pkgs-unstable.vscode; # Needs unstable home-manager
+    enable = true;
+    extensions = [
+        pkgs.vscode-extensions.bbenoist.Nix
+        pkgs.vscode-extensions.justusadam.language-haskell
+      ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+        {
+          name = "haskell-linter";
+          publisher = "hoovercj";
+          version = "0.0.6";
+          sha256 = "0fb71cbjx1pyrjhi5ak29wj23b874b5hqjbh68njs61vkr3jlf1j";
+        }
+        {
+          name = "ctags-support";
+          publisher = "jaydenlin";
+          version = "1.0.19";
+          sha256 = "1rp98gv7hgx5phpnyxw81m4sx5ak45z5k81b6wsxj5zacr1wn7pm";
+        }
+      ];
+    userSettings = {
+      "editor.tabSize" = 2;
+      "editor.fontFamily" =  "Fira Code";
+      "editor.fontLigatures" = true;
+      "workbench.editor.highlightModifiedTabs" = true;
+      "files.trimTrailingWhitespace" = true;
+      "telemetry.enableCrashReporter" = false;
+      "workbench.iconTheme" = "vs-minimal";
+      "workbench.colorTheme" = "Monokai";
+    };
+  };
+
+  services.emacs.enable = true;
+  programs.emacs = {
+    enable = true;
+    package = pkgs-unstable.emacs;
   };
 
   home.sessionVariables = {
     EDITOR = "kak";
+    HOSTALIASES = "${pkgs.stevenblack-hosts}/hosts";
   };
 
   programs.direnv = {
@@ -124,10 +310,14 @@
 
   services.redshift = {
     enable = true;
+    tray = true;
     brightness.day = "1.0";
     brightness.night = "0.7";
-    longitude  = "153.0251";
-    latitude = "-27.4698";
+    provider = "geoclue2";
+
+    # Brisbane lat/long
+    # longitude  = "153.0251";
+    # latitude = "-27.4698";
   };
 
   services.lorri.enable = true;
@@ -144,22 +334,40 @@
     userEmail = "sean.chalmers@obsidian.systems";
     userName = "Sean Chalmers";
     ignores = [
-      "dist/"
-      "dist-newstyle/"
+      "*dist"
+      "*dist-newstyle"
+      ".ghc-environment*"
     ];
   };
 
-  # Shamelessly stolen from benkoleras config for copy/paste great justice.
-  programs.urxvt = {
+  programs.alacritty = {
     enable = true;
-    fonts = ["xft:Source Code Pro:size=11"];
-    keybindings = {
-      "Shift-Control-C" = "eval:selection_to_clipboard";
-      "Shift-Control-V" = "eval:paste_clipboard";
+    settings = {
+      font = {
+        size = 7.0;
+        normal = {
+          family = "Iosevka";
+          style = "Regular";
+        };
+        italic = {
+          family = "Iosevka";
+        };
+        bold = {
+          family = "Iosevka";
+        };
+      };
     };
-    # transparent = true;
-    shading = 50;
   };
+
+  # Shamelessly stolen from benkoleras config for great copy/paste justice.
+   programs.urxvt = {
+     enable = true;
+     fonts = ["xft:Iosevka=11"];
+     keybindings = {
+       "Shift-Control-C" = "eval:selection_to_clipboard";
+       "Shift-Control-V" = "eval:paste_clipboard";
+     };
+   };
 
   services.pasystray.enable = true;
   services.network-manager-applet.enable = true;

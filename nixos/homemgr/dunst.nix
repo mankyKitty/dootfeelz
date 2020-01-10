@@ -4,20 +4,21 @@
     enable = true;
     settings = {
       global = {
-        font = "Iosevka";
+        font = "Fira Code 11";
         markup = "full";
-        format = "<b>%s</b>\\n%b";
+        format = "<b>%a:</b> %s\n%b";
         icon_position = "left";
-        sort = true;
-        geometry = "500x60-10+29";
-        alignment = "center";
+        max_icon_size = 48;
+        geometry = "300x10-10+29";
+        alignment = "left";
         separator_height = 2;
         transparency = 10;
         padding = 6;
         horizontal_padding = 6;
         word_wrap = true;
         separator_color = "frame";
-        frame_width = 2; 
+        frame_width = 2;
+        follow = "keyboard";
       };
       shortcuts = {
         close = "ctrl+space";

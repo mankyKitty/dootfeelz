@@ -11,9 +11,9 @@ fetchzip {
   postFetch = ''
     mkdir -p $out/share/fonts/truetype
     mkdir trash
-    
+
     unzip $downloadedFile -d trash
-    
+
     cp trash/PressStart2P-${commit}/fonts/PressStart2P-Regular.otf $out/share/fonts/truetype/
     cp trash/PressStart2P-${commit}/fonts/PressStart2P-Regular.ttf $out/share/fonts/truetype/
 

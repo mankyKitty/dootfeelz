@@ -2,12 +2,14 @@
 {
   services.dunst = {
     enable = true;
+    iconTheme.size = "16x16";
     settings = {
       global = {
         font = "Iosevka";
         markup = "full";
         format = "<b>%s</b>\\n%b";
         icon_position = "left";
+        # max_icon_size = "16x16";
         sort = true;
         geometry = "500x60-10+29";
         alignment = "center";

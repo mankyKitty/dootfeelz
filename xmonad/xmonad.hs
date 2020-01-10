@@ -26,9 +26,6 @@ import           XMonad.Layout.ThreeColumns
 -- Some keys for later
 -- ((0, XT.xK_Print), spawn "maim -c 1,0,0,0.6 -s ~/screenshots/$(date +%F_%T).png")
 -- , ((modm, XT.xK_Print), spawn "maim -s --format png -c 1,0,0,0.6 /dev/stdout | xclip -selection clipboard -t image/png -i")
--- , ((XT.controlMask .|. XT.mod1Mask, XT.xK_q), spawn "~/.screenlayout/laptop-only.sh")
--- , ((XT.controlMask .|. XT.mod1Mask, XT.xK_w), spawn "~/.screenlayout/the-fort.sh")
--- , ((modm .|. XT.shiftMask, XT.xK_p), spawn "~/bin/passmenu")
 --
 spotifySend =
   mappend "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player."
@@ -98,26 +95,20 @@ main = do
   xmonad . docks $ def
     { keys = myKeys
     , modMask = XT.mod4Mask
-    , terminal = "urxvt"
+    , terminal = "alacritty" -- formerly "urxvt"
     -- avoidStruts tells windows to avoid the "strut" where docks live
     , layoutHook = avoidStruts myLayout
     , logHook = eventLogHook
     , manageHook = manageSpawn <+> manageDocks <+> manageHook def
     , workspaces =
       [ "1:code"
-      , "2:browserB"
-      , "3:browserA"
+      , "2:browser (other)"
+      , "3:browser (most)"
       , "4:musak"
-      , "5"
-      , "6:time-wasting"
+      , "5:email"
+      , "6"
       , "7"
       , "8"
       , "9"
       ]
-    -- , startupHook = do
-    --     spawnOn "1:code" "urxvt"
-    --     spawnOn "2:browserB" "firefox"
-    --     spawnOn "4:musak" "spotify"
-    --     spawnOn "6:time-wasting" "Discord"
-    --     spawnOn "6:time-wasting" "slack"
     }

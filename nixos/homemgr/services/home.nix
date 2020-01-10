@@ -1,0 +1,1 @@
+/home/manky/repos/dootfeelz/nixos/homemgr/home.nix

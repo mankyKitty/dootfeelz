@@ -17,6 +17,12 @@ set directory=/tmp/vimswap//
 let &t_SI = "\<Esc>]50;CursorShape=1\x7"
 let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 
+if empty(glob('~/.config/nvim/autoload/plug.vim'))
+  silent !curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
 call plug#begin('~/.nvim/plugged')
 
 Plug 'LnL7/vim-nix'
@@ -35,7 +41,7 @@ Plug 'alex-ren/org.ats-lang.toolats', { 'rtp': 'org.ats-lang.toolats.vim' }
 
 " OMG
 Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
-Plug 'Mercury-Language/mercury', { 'rtp': 'vim', 'do': 'make install' }
+" Plug 'Mercury-Language/mercury', { 'rtp': 'vim', 'do': 'make install' }
 
 call plug#end()
 
