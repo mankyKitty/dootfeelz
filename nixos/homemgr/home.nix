@@ -28,9 +28,16 @@ in
       (import ./overlays/kak-fzf)
       (import ./overlays/lorri)
       (import ./overlays/kakoune)
+
+      # Get the theme of synth.
       (import ./overlays/synthwave-x-fluoromachine)
+
+      # This triggers a 'corrupt installation' warning from vscode.. worth it.
       (self: super: {
         vscode = super.vscode.overrideAttrs (old: {
+          # This injects the CSS into the workbench.html, which is nicer and more reliable
+          # than doing it via JS on the fly via an extension which requires that I alter
+          # my file permissions so it can work its evil.
           patches = [ ./patches/add-synthwave-css.patch ];
         });
       })
@@ -281,13 +288,6 @@ in
           sha256 = "0fb71cbjx1pyrjhi5ak29wj23b874b5hqjbh68njs61vkr3jlf1j";
         }
         {
-          name = "vscode-custom-css";
-          publisher = "be5invis";
-          version = "3.0.9";
-          sha256 = "05nq7nwl1jrxxfbj7s48lka1kw1yn632paxk30q4ksjnzr6bavjk";
-        }
-        # yasssss webrender/synthwave-vscode-x-fluoromachine 0.0.9
-        {
           name = "synthwave-x-fluoromachine";
           publisher = "webrender";
           version = "0.0.9";
@@ -303,8 +303,6 @@ in
       "telemetry.enableCrashReporter" = false;
       "workbench.iconTheme" = "vs-minimal";
       "workbench.colorTheme" = "Synthwave x Fluoromachine";
-      "vscode_custom_css.imports" = ["file://${pkgs.vscode-theme-synthwave}/synthwave-x-fluoromachine.css"];
-      "vscode_custom_css.policy" = true;
     };
   };
 
