@@ -151,6 +151,10 @@ in
     };
   };
 
+  home.file.".ghci".text = ''
+  :set prompt "\ESC[1;34m%s\n\ESC[0;34mλ> \ESC[m"
+  '';
+
   # home.file.".config/nvim/init.vim".source = ~/repos/dootfeelz/editor/neovim/init.vim;
 
   programs.firefox.enable = true;
@@ -274,12 +278,21 @@ in
     '';
   };
 
+  # To add an extension, use this template:
+  # {
+  #   name = "git-project-manager";
+  #   publisher = "felipecaputo";
+  #   version = "1.7.1";
+  #   sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  # }
   programs.vscode = {
     # package = pkgs-unstable.vscode; # Needs unstable home-manager
     enable = true;
-    extensions = [
-        pkgs.vscode-extensions.bbenoist.Nix
-        pkgs.vscode-extensions.justusadam.language-haskell
+    extensions = with pkgs.vscode-extensions; [
+        bbenoist.Nix
+        justusadam.language-haskell
+        ms-vscode.cpptools
+
       ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
         {
           name = "haskell-linter";
@@ -293,16 +306,47 @@ in
           version = "0.0.9";
           sha256 = "1d43gfwja7nlfvrx1gb912vkv4p59g10agamlbkcy3sfv1kp9agx";
         }
+        {
+          name = "git-project-manager";
+          publisher = "felipecaputo";
+          version = "1.7.1";
+          sha256 = "1pghgzs89qwp9bx6z749z6a00pfqm2416n4lmna6dhpk5671hah9";
+        }
+        {
+          name = "rewrap";
+          publisher = "stkb";
+          version = "1.9.1";
+          sha256 = "1gr51m2n0wgsijkh7nizja91ail9f83hmy5wy3h5j0xhgi3hpkar";
+        }
       ];
     userSettings = {
       "editor.tabSize" = 2;
       "editor.fontFamily" =  "Fira Code";
       "editor.fontLigatures" = true;
-      "workbench.editor.highlightModifiedTabs" = true;
+      "editor.rulers" = [80 90 100];
+
       "files.trimTrailingWhitespace" = true;
+      "files.associations" = {
+        "*.hsc" = "haskell";
+      };
+
       "telemetry.enableCrashReporter" = false;
+      "telemetry.enableTelemetry" = false;
+
+      "workbench.editor.highlightModifiedTabs" = true;
       "workbench.iconTheme" = "vs-minimal";
       "workbench.colorTheme" = "Synthwave x Fluoromachine";
+
+      "terminal.integrated.shell.linux" = "${pkgs.fish}/bin/fish";
+
+      "gitProjectManager.baseProjectsFolders" = [
+        "/home/manky/repos"
+      ];
+      "gitProjectManager.storeRepositoriesBetweenSessions" = true;
+
+      # "rewrap.wrappingColumn" = 90;
+      "rewrap.wholeComment" = false;
+      "rewrap.doubleSentenceSpacing" = true;
     };
   };
 
@@ -335,7 +379,7 @@ in
     # latitude = "-27.4698";
   };
 
-  services.lorri.enable = true;
+  # services.lorri.enable = true;
 
   services.xscreensaver = {
     enable = true;

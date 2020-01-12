@@ -59,67 +59,67 @@ Add some themey goodness.
 #+END_SRC
 * =which-key= for discoverability
 #+BEGIN_SRC emacs-lisp
-(setq which-key-enable-extended-define-key t)
-(use-package which-key
-  :ensure t
-  :diminish which-key-mode
-  :init
-  (setq which-key-separator " ")
-  (setq which-key-prefix-prefix "+")
-  :config
-  (which-key-mode 1)
+  (setq which-key-enable-extended-define-key t)
+  (use-package which-key
+    :ensure t
+    :diminish which-key-mode
+    :init
+    (setq which-key-separator " ")
+    (setq which-key-prefix-prefix "+")
+    :config
+    (which-key-mode 1)
 
-)
+  )
 
-;; (defun manky/add-leader-prefix-name (k n)
-;;   "Using the current evil-leader key, define a name for which-key to display"
-;;   (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " " k) n))
+  (defun manky/add-leader-prefix-name (k n)
+    "Using the current evil-leader key, define a name for which-key to display"
+    (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " " k) n))
 #+END_SRC
 
 * Evil mode for great justice
 With hopefully less RSI..
 
 #+BEGIN_SRC emacs-lisp
-;; (use-package evil
-;;   :ensure t
-;;   :config
+  (use-package evil
+    :ensure t
+    :config
 
-;;   (use-package evil-leader
-;;     :ensure t
-;;     :config
-;;     (global-evil-leader-mode 1)
-;;     (evil-leader/set-leader "<SPC>"))
+    (use-package evil-leader
+      :ensure t
+      :config
+      (global-evil-leader-mode 1)
+      (evil-leader/set-leader "<SPC>"))
 
-;;   (use-package evil-surround
-;;     :ensure t
-;;     :config (global-evil-surround-mode))
+    (use-package evil-surround
+      :ensure t
+      :config (global-evil-surround-mode))
 
-;;   (use-package evil-escape
-;;     :ensure t
-;;     :diminish evil-escape-mode
-;;     :init (setq-default evil-escape-key-sequence "jk")
-;;     :config (evil-escape-mode 1))
+    (use-package evil-escape
+      :ensure t
+      :diminish evil-escape-mode
+      :init (setq-default evil-escape-key-sequence "jk")
+      :config (evil-escape-mode 1))
 
-;;   (use-package evil-nerd-commenter
-;;     :ensure t
-;;     :config
-;;     (manky/add-leader-prefix-name "c" "comments")
-;;     (evil-leader/set-key
-;;       "cl" 'evilnc-comment-or-uncomment-lines
-;;       "cc" 'evilnc-copy-and-comment-lines
-;;       "cp" 'evilnc-comment-or-uncomment-paragraphs
-;;       "cr" 'comment-or-uncomment-region
-;;       "cv" 'evilnc-toggle-invert-comment-line-by-line
-;;       "."  'evilnc-copy-and-comment-operator
-;;       "\\" 'evilnc-comment-operator ; if you prefer backslash key
-;;       )
-;;   )
-;;   ;; (use-package powerline-evil
-;;   ;;   :ensure t
-;;   ;;   :config
-;;   ;;   (powerline-evil-vim-color-theme))
-;;   (evil-mode 1)
-;; )
+    (use-package evil-nerd-commenter
+      :ensure t
+      :config
+      (manky/add-leader-prefix-name "c" "comments")
+      (evil-leader/set-key
+        "cl" 'evilnc-comment-or-uncomment-lines
+        "cc" 'evilnc-copy-and-comment-lines
+        "cp" 'evilnc-comment-or-uncomment-paragraphs
+        "cr" 'comment-or-uncomment-region
+        "cv" 'evilnc-toggle-invert-comment-line-by-line
+        "."  'evilnc-copy-and-comment-operator
+        "\\" 'evilnc-comment-operator ; if you prefer backslash key
+        )
+    )
+    ;; (use-package powerline-evil
+    ;;   :ensure t
+    ;;   :config
+    ;;   (powerline-evil-vim-color-theme))
+    (evil-mode 1)
+  )
 #+END_SRC
 * Xah Fly Keys
 And now for something completely different.
@@ -138,26 +138,31 @@ And now for something completely different.
       (use-package avy
         :ensure t
         :config
-    ;;     (xah-fly--define-keys 'avy-keymap
-    ;;     '(
-    ;;     ("c" . 'avy-goto-char)
-    ;;     ("C" . 'avy-goto-char-2)
-    ;;     ("t" . 'avy-goto-char-timer)
-    ;;     ("l" . 'avy-goto-line)
-    ;;     ("w" . 'avy-goto-word-1)
-    ;;     ("W" . 'avy-goto-word-0)
-    ;;     ("o" . 'avy-org-goto-heading-timer)
-    ;;     ("R" . 'avy-org-refile-as-child)
-    ;; ))
-    ;;     (let ((avy-keys ((kbd "c") . 'avy-goto-char
-    ;;     ))))
+        ;; (xah-fly--define-keys 'avy-keymap
+        ;; '(
+        ;; ("c" . 'avy-goto-char)
+        ;; ("C" . 'avy-goto-char-2)
+        ;; ("t" . 'avy-goto-char-timer)
+        ;; ("l" . 'avy-goto-line)
+        ;; ("w" . 'avy-goto-word-1)
+        ;; ("W" . 'avy-goto-word-0)
+        ;; ("o" . 'avy-org-goto-heading-timer)
+        ;; ("R" . 'avy-org-refile-as-child)
+        ;; ))
+        ;; (let ((avy-keys ((kbd "c") . 'avy-goto-char))))
 
-    ;; (manky /add-leader-prefix-name "j" "avy")
-        ;; (evil-leader/set-key
-        ;;   "j c" 'avy-goto-char
-
-        ;; )
-      )
+        (manky/add-leader-prefix-name "j" "avy")
+        (evil-leader/set-key
+          "j c" 'avy-goto-char
+          "j c" 'avy-goto-char
+          "j C" 'avy-goto-char-2
+          "j t" 'avy-goto-char-timer
+          "j l" 'avy-goto-line
+          "j w" 'avy-goto-word-1
+          "j W" 'avy-goto-word-0
+          "j o" 'avy-org-goto-heading-timer
+          "j R" 'avy-org-refile-as-child
+          ))
   #+END_SRC
 * Clean up the Emacs UI
 #+BEGIN_SRC emacs-lisp
@@ -223,39 +228,40 @@ And now for something completely different.
 * Projectile for project goodness
 ** Projectile
 #+BEGIN_SRC emacs-lisp
-(use-package projectile
-  :ensure t
-  :after (helm)
-  :delight '(:eval (concat " " (projectile-project-name)))
-  :init
-  (setq projectile-require-project-root nil)
-  :config
-  (projectile-mode 1)
-  ;; (evil-leader/set-key
-  ;;   "p" 'projectile-command-map
-  ;;   )
-)
+  (use-package projectile
+    :ensure t
+    :after (helm)
+    :delight '(:eval (concat " " (projectile-project-name)))
+    :init
+    (setq projectile-require-project-root nil)
+    :config
+    (projectile-mode 1)
+    ;; (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+    (evil-leader/set-key
+      "p" 'projectile-command-map
+      )
+  )
 #+END_SRC
 ** Helm projectile for fuzzy projects
 #+BEGIN_SRC emacs-lisp
-(use-package helm-projectile
-  :ensure t
-  :config
-  (helm-projectile-on)
+  (use-package helm-projectile
+    :ensure t
+    :config
+    (helm-projectile-on)
 
-  ;; (manky/add-leader-prefix-name "p" "projects")
-  ;; (evil-leader/set-key
-  ;;   "p p" 'helm-projectile-switch-project
-  ;;   "p f" 'helm-projectile-find-file
-  ;;   "p b" 'helm-projectile-switch-to-buffer
-  ;;   "p s" 'helm-projectile-ag
+    (manky/add-leader-prefix-name "p" "projects")
+    (evil-leader/set-key
+      "p p" 'helm-projectile-switch-project
+      "p f" 'helm-projectile-find-file
+      "p b" 'helm-projectile-switch-to-buffer
+      "p s" 'helm-projectile-ag
 
-  ;;   ;; helm-projectile-find-file-in-known-projects
-  ;;   ;; helm-projectile-find-file-dwim
-  ;;   ;; helm-projectile-find-dir
-  ;;   ;; helm-projectile-recentf
-  ;; )
-)
+      ;; helm-projectile-find-file-in-known-projects
+      ;; helm-projectile-find-file-dwim
+      ;; helm-projectile-find-dir
+      ;; helm-projectile-recentf
+    )
+  )
 #+END_SRC
 * Minor Text/Layout utils
 ** aggressive-indent
@@ -289,17 +295,17 @@ Not in use at the moment
   (show-paren-mode t)
 )
 #+END_SRC
-#+END_SRC
+
 * Git!
 #+BEGIN_SRC emacs-lisp
-(use-package magit
-  :ensure t
-  :diminish magit-auto-revert-mode
-  :init
-  ;; (manky/add-leader-prefix-name "g" "git")
-  ;; (evil-leader/set-key
-  ;;   "g s" 'magit-status)
-)
+  (use-package magit
+    :ensure t
+    :diminish magit-auto-revert-mode
+    :init
+    (manky/add-leader-prefix-name "g" "git")
+    (evil-leader/set-key
+      "g s" 'magit-status)
+  )
 #+END_SRC
 * Direnv
   #+BEGIN_SRC emacs-lisp
@@ -431,56 +437,56 @@ shared common code, i.e
 
 ** Flycheck
 #+BEGIN_SRC emacs-lisp
-(use-package flycheck
-  :ensure t
-  :init
-  ;; (manky/add-leader-prefix-name "t" "toggle")
-  ;; (manky/add-leader-prefix-name "e" "fc-errors")
-  ;; (evil-leader/set-key
-  ;;   "t s" 'flycheck-mode
-  ;;   "e n" 'flycheck-next-error
-  ;;   "e p" 'flycheck-previous-error
-  ;; )
-  (setq flycheck-command-wrapper-function
-        (lambda (command) (apply 'nix-shell-command (nix-current-sandbox) command))
-        flycheck-executable-find
-        (lambda (cmd) (nix-executable-find (nix-current-sandbox) cmd)))
-)
+  (use-package flycheck
+    :ensure t
+    :init
+    (manky/add-leader-prefix-name "t" "toggle")
+    (manky/add-leader-prefix-name "e" "fc-errors")
+    (evil-leader/set-key
+      "t s" 'flycheck-mode
+      "e n" 'flycheck-next-error
+      "e p" 'flycheck-previous-error
+    )
+    (setq flycheck-command-wrapper-function
+          (lambda (command) (apply 'nix-shell-command (nix-current-sandbox) command))
+          flycheck-executable-find
+          (lambda (cmd) (nix-executable-find (nix-current-sandbox) cmd)))
+  )
 #+END_SRC
 
 ** Dante (Haskell)
 #+BEGIN_SRC emacs-lisp
-(use-package dante
-  :hook haskell-mode
-  :ensure t
-  :after haskell-mode
-  :commands 'dante-mode
-  :init
-  (add-hook 'dante-mode-hook
-    '(lambda () (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint))))
+  (use-package dante
+    :hook haskell-mode
+    :ensure t
+    :after haskell-mode
+    :commands 'dante-mode
+    :init
+    (add-hook 'dante-mode-hook
+      '(lambda () (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint))))
 
-  :config
-  (defun manky/dante-insert-type ()
-    (interactive)
-    (dante-type-at t))
+    :config
+    (defun manky/dante-insert-type ()
+      (interactive)
+      (dante-type-at t))
 
-  ;; (evil-leader/set-key-for-mode 'haskell-mode
-  ;;   "r t" 'manky/dante-insert-type
-  ;; )
-  ;; (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " r t") "insert type")
-)
+    (evil-leader/set-key-for-mode 'haskell-mode
+      "r t" 'manky/dante-insert-type
+    )
+    (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " r t") "insert type")
+  )
 
 #+END_SRC
 ** Attrap
 Try to fix the issue at the cursor
 #+BEGIN_SRC emacs-lisp
-(use-package attrap
-  :ensure t
-  :init
-  ;; (manky/add-leader-prefix-name "r" "refactor")
-  ;; (evil-leader/set-key-for-mode 'haskell-mode
-  ;;   "r f" 'attrap-attrap)
-  )
+  (use-package attrap
+    :ensure t
+    :init
+    (manky/add-leader-prefix-name "r" "refactor")
+    (evil-leader/set-key-for-mode 'haskell-mode
+      "r f" 'attrap-attrap)
+    )
 #+END_SRC
 * Complete Anything (company)
   #+BEGIN_SRC emacs-lisp
@@ -520,34 +526,34 @@ Clean up the mode line a bit as it gets a bit busy by default.
 ** Everything that has a beginning
 #+BEGIN_SRC emacs-lisp
 ;; This is just the beginning
-;; (evil-leader/set-key
+(evil-leader/set-key
 #+END_SRC
 
 ** Text
    #+BEGIN_SRC emacs-lisp
-     ;; "x a r" 'align-regexp
-     ;; "x d w" 'delete-trailing-whitespace
+    "x a r" 'align-regexp
+    "x d w" 'delete-trailing-whitespace
 
    #+END_SRC
 
 ** File
    #+BEGIN_SRC emacs-lisp
-   ;; "f s" 'save-buffer
+    "f s" 'save-buffer
 
    #+END_SRC
 
 ** Buffer
    #+BEGIN_SRC emacs-lisp
-     ;; "b d" 'kill-this-buffer
-     ;; "b b" 'switch-to-buffer
-     ;; "TAB" 'mode-line-other-buffer
+    "b d" 'kill-this-buffer
+    "b b" 'switch-to-buffer
+    "TAB" 'mode-line-other-buffer
 
    #+END_SRC
 
 ** ...has an end, Neo.
 #+BEGIN_SRC emacs-lisp
-  ;; )
-  ;; This is just the end
+)
+;; This is just the end
 #+END_SRC
 
 * Org
