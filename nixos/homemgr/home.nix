@@ -28,6 +28,7 @@ in
       (import ./overlays/kak-fzf)
       (import ./overlays/lorri)
       (import ./overlays/kakoune)
+      (import ./overlays/kakoune-selenized)
 
       # Get the theme of synth.
       (import ./overlays/synthwave-x-fluoromachine)
@@ -74,6 +75,7 @@ in
 
     # languages
     pkgs-unstable.mercury
+    pkgs-unstable.exercism
 
     # turtle power
     shellcheck
@@ -144,7 +146,7 @@ in
     end
     '';
     shellAliases = {
-      emacs = "emacsclient -nc";
+      ghci = "ghci -interactive-print=Text.Pretty.Simple.pPrint -package pretty-simple";
       ns = "nix-shell $argv --command fish";
       gs = "git status";
       ob-standup = "zoom-us \"zoommtg://zoom-us/join?confno=9355149074\"";
@@ -162,6 +164,7 @@ in
   programs.fzf.enable = true;
 
   # Fix this to use a 'toTOML' generators
+  # At least at some point when kak-lsp is more useful for haskell projects... ;<
   # home.file.".config/kak-lsp/kak-lsp.toml".text  = ''
   #   snippet_support = false
   #   verbosity = 2
@@ -179,10 +182,15 @@ in
   #   args = ["--lsp"]
   # '';
 
+  home.file.".config/kak/colors" = {
+    source = pkgs.kakoune-selenized + /colors;
+    recursive = true;
+  };
+
   programs.kakoune = {
     enable = true;
     config = {
-      colorScheme = "gruvbox";
+      colorScheme = "selenized-black";
       numberLines.enable = true;
       showWhitespace.enable = true;
       tabStop = 2;
@@ -350,8 +358,8 @@ in
     };
   };
 
-  home.file.".emacs.d/init.el".source = ~/repos/dootfeelz/editor/emacs/init.el;
-  services.emacs.enable = true;
+  # home.file.".emacs.d/init.el".source = ~/repos/dootfeelz/editor/emacs/init.el;
+  # services.emacs.enable = true;
   programs.emacs = {
     enable = true;
     package = pkgs-unstable.emacs;
