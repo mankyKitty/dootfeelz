@@ -2,6 +2,9 @@
 let
   from-home = dir: ./repos/dootfeelz/nixos/homemgr + dir;
   pkgs-unstable = import <nixpkgs-unstable> {};
+  ghcide-nix = import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/master") {};
+
+  nivToken = "48dc89c30815de98496469a71b6f15599ba07b66";
 
   postman780 = import ./packages/postman;
 
@@ -35,7 +38,7 @@ in
 
       # This triggers a 'corrupt installation' warning from vscode.. worth it.
       (self: super: {
-        vscode = super.vscode.overrideAttrs (old: {
+        vscode = pkgs-unstable.vscode.overrideAttrs (old: {
           # This injects the CSS into the workbench.html, which is nicer and more reliable
           # than doing it via JS on the fly via an extension which requires that I alter
           # my file permissions so it can work its evil.
@@ -68,13 +71,15 @@ in
     ed
     stevenblack-hosts
     cachix
+    dnsmasq
 
     # editor shenanigans
     kakoune
     # pkgs-unstable.kak-lsp
+    ghcide-nix.ghcide-ghc865
 
     # languages
-    pkgs-unstable.mercury
+    # pkgs-unstable.mercury
     pkgs-unstable.exercism
 
     # turtle power
@@ -109,11 +114,13 @@ in
 
     # nix-tility
     nix-prefetch-scripts
+    pkgs-unstable.haskellPackages.niv
 
     # omg unfree!
     spotify
     epiphany
     pkgs-unstable.discord
+    pkgs-unstable.brave
   ];
 
   programs.jq.enable = true;
@@ -121,42 +128,42 @@ in
 
   programs.fish = {
     enable = true;
-    promptInit = ''
-    function fish_prompt -d "my nix fish"
-      set -l nix_shell_info (
-        if set -q IN_NIX_SHELL
-          echo -n -s " <nix-shell> "
-        end
-      )
-      set -l color_cwd
-      set -l suffix
-      switch "$USER"
-          case root toor
-              if set -q fish_color_cwd_root
-                  set color_cwd $fish_color_cwd_root
-              else
-                  set color_cwd $fish_color_cwd
-              end
-              set suffix '#'
-          case '*'
-              set color_cwd $fish_color_cwd
-              set suffix '>'
-      end
-      echo -n -s "$USER" @ (prompt_hostname) ' ' (set_color $color_cwd) (prompt_pwd) (set_color normal) "$nix_shell_info$suffix "
-    end
-    '';
+    # promptInit = ''
+    # function fish_prompt -d "my nix fish"
+    #   set -l nix_shell_info (
+    #     if set -q IN_NIX_SHELL
+    #       echo -n -s " <nix-shell> "
+    #     end
+    #   )
+    #   set -l color_cwd
+    #   set -l suffix
+    #   switch "$USER"
+    #       case root toor
+    #           if set -q fish_color_cwd_root
+    #               set color_cwd $fish_color_cwd_root
+    #           else
+    #               set color_cwd $fish_color_cwd
+    #           end
+    #           set suffix '#'
+    #       case '*'
+    #           set color_cwd $fish_color_cwd
+    #           set suffix '>'
+    #   end
+    #   echo -n -s "$USER" @ (prompt_hostname) ' ' (set_color $color_cwd) (prompt_pwd) (set_color normal) "$nix_shell_info$suffix "
+    # end
+
+    # starship init fish | source
+    # '';
     shellAliases = {
-      ghci = "ghci -interactive-print=Text.Pretty.Simple.pPrint -package pretty-simple";
+      # ghci = "ghci -interactive-print=Text.Pretty.Simple.pPrint -package pretty-simple";
       ns = "nix-shell $argv --command fish";
       gs = "git status";
       ob-standup = "zoom-us \"zoommtg://zoom-us/join?confno=9355149074\"";
+      nivv = "GITHUB_TOKEN=${nivToken} niv";
     };
   };
 
-  home.file.".ghci".text = ''
-  :set prompt "\ESC[1;34m%s\n\ESC[0;34mλ> \ESC[m"
-  '';
-
+  home.file.".ghci".source = ~/repos/dootfeelz/nixos/homemgr/.ghci_config;
   # home.file.".config/nvim/init.vim".source = ~/repos/dootfeelz/editor/neovim/init.vim;
 
   programs.firefox.enable = true;
@@ -190,7 +197,7 @@ in
   programs.kakoune = {
     enable = true;
     config = {
-      colorScheme = "selenized-black";
+      colorScheme = "base16";
       numberLines.enable = true;
       showWhitespace.enable = true;
       tabStop = 2;
@@ -234,12 +241,31 @@ in
       }
 
       hook global WinSetOption filetype=haskell %{
+        # HLinty goodness
         set-option window lintcmd 'hlint'
         lint-enable
+
+        # Hasktaggy goodness
+        set-option window ctagscmd "hasktags -x -c -R"
 
         hook window BufWritePost %val{buffile} %{
           lint
         }
+      }
+
+      hook global KakBegin .* %{
+          evaluate-commands %sh{
+              path="$PWD"
+              while [ "$path" != "$HOME" ] && [ "$path" != "/" ]; do
+                  if [ -e "./tags" ]; then
+                      printf "%s\n" "set-option -add current ctagsfiles %{$path/tags}"
+                      break
+                  else
+                      cd ..
+                      path="$PWD"
+                  fi
+              done
+          }
       }
 
       define-command mkdir %{ nop %sh{ mkdir -p $(dirname $kak_buffile) } }
@@ -326,10 +352,34 @@ in
           version = "1.9.1";
           sha256 = "1gr51m2n0wgsijkh7nizja91ail9f83hmy5wy3h5j0xhgi3hpkar";
         }
+        {
+          name = "code-spell-checker";
+          publisher = "streetsidesoftware";
+          version = "1.7.24";
+          sha256 = "09iv72k045w88ycqbmgirxn27a4fbd28skp7gyz9a6aing6rm3kj";
+        }
+        {
+          name = "vscode-pull-request-github";
+          publisher = "GitHub";
+          version = "0.14.0";
+          sha256 = "00x2nls2nmz9qc8hyp4nfgw300snr7l2dx5mc7y9ll11429iba6j";
+        }
+        {
+          name = "bracket-pair-colorizer";
+          publisher = "CoenraadS";
+          version = "1.0.61";
+          sha256 = "0r3bfp8kvhf9zpbiil7acx7zain26grk133f0r0syxqgml12i652";
+        }
+        {
+          name = "gitlens";
+          publisher = "eamodio";
+          version = "10.2.1";
+          sha256 = "1bh6ws20yi757b4im5aa6zcjmsgdqxvr1rg86kfa638cd5ad1f97";
+        }
       ];
     userSettings = {
       "editor.tabSize" = 2;
-      "editor.fontFamily" =  "Fira Code";
+      "editor.fontFamily" = "Fira Code";
       "editor.fontLigatures" = true;
       "editor.rulers" = [80 90 100];
 
@@ -350,11 +400,14 @@ in
       "gitProjectManager.baseProjectsFolders" = [
         "/home/manky/repos"
       ];
+
       "gitProjectManager.storeRepositoriesBetweenSessions" = true;
 
       # "rewrap.wrappingColumn" = 90;
       "rewrap.wholeComment" = false;
       "rewrap.doubleSentenceSpacing" = true;
+
+      "cSpell.language" = "en-GB";
     };
   };
 
@@ -400,12 +453,32 @@ in
     enable = true;
     userEmail = "sean.chalmers@obsidian.systems";
     userName = "Sean Chalmers";
+    aliases = {
+      code-changes = "!git log --format=format: --name-only | egrep -v '^$' | sort | uniq -c | sort -rg | head -10";
+      cc = "!git code-changes";
+      co = "checkout";
+    };
+    extraConfig = {
+      github = {
+        user = "mankyKitty";
+      };
+      gitlab = {
+        user = "schalmers";
+      };
+    };
     ignores = [
       "*dist"
       "*dist-newstyle"
       ".ghc-environment*"
       "cabal.project.local*"
+      "tags"
+      "TAGS"
     ];
+  };
+
+  programs.starship = {
+    enable = true;
+    enableFishIntegration = true;
   };
 
   programs.alacritty = {
@@ -414,14 +487,14 @@ in
       font = {
         size = 7.0;
         normal = {
-          family = "Iosevka";
+          family = "Fira Code";
           style = "Regular";
         };
         italic = {
-          family = "Iosevka";
+          family = "Fira Code";
         };
         bold = {
-          family = "Iosevka";
+          family = "Fira Code";
         };
       };
     };

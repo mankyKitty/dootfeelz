@@ -15,6 +15,11 @@ Set a global tab width to two spaces
 (setq-default tab-width 2)
 #+END_SRC
 
+Fix up some modes that have their own snowflake variables for indentation.
+#+BEGIN_SRC emacs-lisp
+(setq-default css-indent-offset 2)
+#+END_SRC
+
 Move our backups out of sight
 #+BEGIN_SRC emacs-lisp
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
@@ -43,8 +48,10 @@ Add some themey goodness.
 (use-package monokai-theme
   :ensure t
   :init
-  (load-theme 'monokai t)
-)
+  (load-theme 'monokai t))
+;; (use-package parchment-theme
+;;   :ensure t
+;;   :config (load-theme 'parchment t))
 #+END_SRC
 * Diminish and Delight
 ** Diminish
@@ -116,8 +123,10 @@ Add some themey goodness.
       "\\" 'evilnc-comment-operator ; if you prefer backslash key
       )
   )
+  (use-package powerline :ensure t)
   (use-package powerline-evil
     :ensure t
+    :after (powerline)
     :config
     (powerline-evil-vim-color-theme))
   (evil-mode 1)
@@ -290,6 +299,10 @@ Not in use at the moment
     (evil-leader/set-key
       "g s" 'magit-status)
   )
+  (use-package forge
+    :ensure t
+    :after magit
+  )
 #+END_SRC
 * Direnv
   #+BEGIN_SRC emacs-lisp
@@ -348,9 +361,16 @@ Gotta get that highlighting...
   :config
   ;; Configure haskell-mode to use cabal new-style builds
   (setq haskell-process-type 'cabal-new-repl)
+  ;; Tell company-mode to ask lsp for completions
+  (setq haskell-completion-backend 'lsp)
   ;; Make sure we try to use the current nix env if we have one
   (setq haskell-process-wrapper-function
     (lambda (args) (apply 'nix-shell-command (nix-current-sandbox) args)))
+
+  (setq haskell-hoogle-url "http://localhost:8080/?hoogle=%s")
+  (evil-leader/set-key
+    "h h" 'haskell-hoogle
+    )
 
   ;; Disable the haskell-stack-ghc checker
   (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
@@ -359,6 +379,7 @@ Gotta get that highlighting...
   (add-hook 'haskell-mode-hook 'prettify-symbols-mode)
   (add-hook 'haskell-mode-hook
     (lambda ()
+      (setq tab-width 2)
             (set (make-local-variable 'company-backends)
                  (append '((company-capf company-dabbrev-code))
                          company-backends))))
@@ -398,7 +419,11 @@ Gotta get that highlighting...
 #+END_SRC
 ** Leesp
 #+BEGIN_SRC emacs-lisp
-;; (use-package guile :ensure t)
+(use-package geiser
+  :ensure t
+  :hook (scheme-mode . geiser-mode)
+)
+; (use-package guile :ensure t)
 (use-package paredit
   :ensure t
   :config
@@ -414,6 +439,22 @@ Gotta get that highlighting...
   (eldoc-add-command
     'paredit-backward-delete
     'paredit-close-round)
+)
+#+END_SRC
+** Rust
+#+BEGIN_SRC emacs-lisp
+(use-package rust-mode
+  :ensure t
+  :hook (rust-mode . (lambda () (setq tab-width 4)))
+  :config
+  (manky/add-leader-prefix-name "r" "rust")
+  (evil-leader/set-key
+    "r F" 'rust-format-buffer
+  )
+)
+(use-package cargo
+  :ensure t
+  :hook (rust-mode . cargo-minor-mode)
 )
 #+END_SRC
 * Checking & Linting
@@ -452,31 +493,32 @@ shared common code, i.e
           (lambda (command) (apply 'nix-shell-command (nix-current-sandbox) command))
           flycheck-executable-find
           (lambda (cmd) (nix-executable-find (nix-current-sandbox) cmd)))
+    :config
+    ;; (global-flycheck-mode 1)
   )
 #+END_SRC
 
 ** Dante (Haskell)
 #+BEGIN_SRC emacs-lisp
-  (use-package dante
-    :hook haskell-mode
-    :ensure t
-    :after haskell-mode
-    :commands 'dante-mode
-    :init
-    (add-hook 'dante-mode-hook
-      '(lambda () (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint))))
+  ;; (use-package dante
+  ;;   :hook haskell-mode
+  ;;   :ensure t
+  ;;   :after haskell-mode
+  ;;   :commands 'dante-mode
+  ;;   :init
+  ;;   (add-hook 'dante-mode-hook
+  ;;     '(lambda () (flycheck-add-next-checker 'haskell-dante '(warning . haskell-hlint))))
 
-    :config
-    (defun manky/dante-insert-type ()
-      (interactive)
-      (dante-type-at t))
+  ;;   :config
+  ;;   (defun manky/dante-insert-type ()
+  ;;     (interactive)
+  ;;     (dante-type-at t))
 
-    (evil-leader/set-key-for-mode 'haskell-mode
-      "r t" 'manky/dante-insert-type
-    )
-    (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " r t") "insert type")
-  )
-
+  ;;   (evil-leader/set-key-for-mode 'haskell-mode
+  ;;     "r t" 'manky/dante-insert-type
+  ;;   )
+  ;;   (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " r t") "insert type")
+  ;; )
 #+END_SRC
 ** Attrap
 Try to fix the issue at the cursor
@@ -513,6 +555,13 @@ Clean up the mode line a bit as it gets a bit busy by default.
   (add-hook 'after-init-hook 'sml/setup)
 )
 #+END_SRC
+* Misc Functions
+#+BEGIN_SRC emacs-lisp
+(defun manky/reindent-buffer ()
+  "Indent current buffer according to major mode."
+  (interactive)
+  (indent-region (point-min) (point-max)))
+#+END_SRC
 * Binding of the Keys
   All misc key bindings are going to be placed here. I might be able to
   keep things neat with heavy use of =org-babel= tangling.
@@ -548,6 +597,7 @@ Clean up the mode line a bit as it gets a bit busy by default.
    #+BEGIN_SRC emacs-lisp
      "b d" 'kill-this-buffer
      "b b" 'switch-to-buffer
+     "b I" 'manky/reindent-buffer
      "TAB" 'mode-line-other-buffer
 
    #+END_SRC
@@ -617,3 +667,85 @@ Clean up the mode line a bit as it gets a bit busy by default.
   :after (visual-fill-column)
 )
 #+END_SRC
+* Language Server Protocol & Languages
+  One stop shop for all the HIE config shenanigans
+
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-mode
+  :ensure t
+  :hook (haskell-mode . lsp)
+  :init
+  (setq lsp-prefer-flymake nil)
+  :config
+  (setq lsp-prefer-flymake nil)
+  )
+  #+END_SRC emacs-lisp
+
+** ~lsp-ui~
+#+BEGIN_SRC emacs-lisp
+ (use-package lsp-ui
+   :after (lsp-mode)
+   :ensure t
+   :config
+   (setq lsp-prefer-flymake nil))
+   #+END_SRC emacs-lisp
+
+** ~company-lsp~
+ #+begin_src emacs-lisp
+(use-package company-lsp
+  :ensure t
+  :after (company-mode lsp-mode)
+  :commands company-lsp)
+ #+end_src
+** ~helm-lsp~
+ #+begin_src emacs-lisp
+(use-package helm-lsp
+  :ensure t
+  :after (lsp-mode))
+   #+end_src
+** ~lsp-treemacs~
+   Workspace wide error navigation/overview
+   #+begin_src emacs-lisp
+(use-package lsp-treemacs
+  :ensure t
+  :after (lsp-mode)
+  :config
+  (lsp-treemacs-sync-mode 1))
+   #+end_src
+** LSP Language Plugins
+*** Haskell
+     #+begin_src emacs-lisp
+       (use-package lsp-haskell
+         :ensure t
+         :after (lsp-mode haskell-mode)
+         :config
+         (setq default-nix-wrapper (lambda (args)
+           (append
+             (append (list "nix-shell" "-I" "." "--command" ) (list (mapconcat 'identity args " ")))
+             (list (nix-current-sandbox)))))
+
+         (setq lsp-haskell-process-wrapper-function default-nix-wrapper)
+         (setq lsp-haskell-process-path-hie "ghcide")
+         (setq lsp-haskell-process-args-hie '())
+         ;; (setq default-nix-wrapper (lambda (args)
+         ;;   (append
+         ;;     (append (list "nix-shell" "-I" "." "--command" ) (list (mapconcat 'identity args " ")))
+         ;;     (list (nix-current-sandbox)))))
+
+         ;; (add-hook 'haskell-mode 'flycheck-mode)
+       )
+     #+end_src
+** Set some LSP keybindings
+   #+begin_src emacs-lisp
+   (evil-leader/set-key
+     "l e" 'lsp-treemacs-errors-list
+     "l a" 'helm-lsp-code-actions
+     "l t" 'helm-lsp-workspace-symbol
+     "l T" 'helm-lsp-global-workspace-symbol
+     "l f" 'lsp-format-buffer
+
+     "L s" 'lsp
+     "L d" 'lsp-workspace-shutdown
+     "L r" 'lsp-workspace-restart
+   )
+   #+end_src
