@@ -386,6 +386,15 @@ Gotta get that highlighting...
 
 )
 #+END_SRC
+*** Ormolu
+#+BEGIN_SRC emacs-lisp
+;; Needed for ormolu package integration.
+(use-package reformatter :ensure t)
+
+(use-package ormolu
+ :ensure t
+ :bind (:map haskell-mode-map ("C-c r" . ormolu-format-buffer)))
+#+END_SRC
 
 *** Structured Haskell (omg)
     Just ... doesn't work. :/

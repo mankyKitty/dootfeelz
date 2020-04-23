@@ -95,7 +95,7 @@ main = do
   xmonad . docks $ def
     { keys = myKeys
     , modMask = XT.mod4Mask
-    , terminal = "alacritty" -- formerly "urxvt"
+    , terminal = "kitty" -- "alacritty" -- formerly "urxvt"
     -- avoidStruts tells windows to avoid the "strut" where docks live
     , layoutHook = avoidStruts myLayout
     , logHook = eventLogHook

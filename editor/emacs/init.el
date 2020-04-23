@@ -26,7 +26,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("4b918218201f43b06aee6367eda594e500d3afc4f790a238a6f8a2987287334b" "a2cde79e4cc8dc9a03e7d9a42fabf8928720d420034b66aecc5b665bbf05d4e9" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" default)))
+    ("0f5cebcafc8463d1abc52917c7060499ce0c037989ae635c493945db3e5c0dda" "b9e9ba5aeedcc5ba8be99f1cc9301f6679912910ff92fdf7980929c2fc83ab4d" "03cc0972581c0f4c8ba3c10452cb6d52a9f16123df414b917e06445c5fdbe255" "4b918218201f43b06aee6367eda594e500d3afc4f790a238a6f8a2987287334b" "a2cde79e4cc8dc9a03e7d9a42fabf8928720d420034b66aecc5b665bbf05d4e9" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" default)))
  '(helm-ag-insert-at-point (quote symbol))
  '(lsp-prefer-flymake nil)
  '(org-drill-done-count-color "#663311")

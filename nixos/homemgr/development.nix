@@ -19,7 +19,7 @@ in
     ghcid
     cabal2nix
     hlint
-    stylish-haskell
+    # stylish-haskell
     (ghcWithHoogle (haskPkgs: with haskPkgs; [
       pretty-simple
       lens
@@ -27,7 +27,7 @@ in
       text
       bytestring
     ]))
-    (justHaskStatics haskell-ci)
+    # (justHaskStatics haskell-ci)
     (all-hies.selection { selector = p: { inherit (p) ghc864 ghc865; }; })
   ]);
 }

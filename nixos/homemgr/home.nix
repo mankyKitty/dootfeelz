@@ -4,7 +4,7 @@ let
   pkgs-unstable = import <nixpkgs-unstable> {};
   ghcide-nix = import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/master") {};
 
-  nivToken = "48dc89c30815de98496469a71b6f15599ba07b66";
+  nivToken = "2578eeea7034fb742727846f1ac3eba02fd9762c";
 
   postman780 = import ./packages/postman;
 
@@ -20,6 +20,15 @@ let
   );
   kakImport = name: ''source "${name}"'';
   allKakImports = dir: builtins.concatStringsSep "\n" (map kakImport (allKakFiles dir));
+
+  wrappedVSCode = pkgs.writeScriptBin "wcode" ''
+    #!${pkgs.stdenv.shell}
+    exec ${pkgs-unstable.vscode}/bin/code \
+     --user-data-dir ~/.config/vscode/data/ \
+     --extensions-dir ~/.config/vscode/ext/ \
+     "$\{extraFlagsArray[@]\}" \
+     "$@"
+  '';
 in
 {
   nixpkgs.config = {
@@ -37,14 +46,14 @@ in
       (import ./overlays/synthwave-x-fluoromachine)
 
       # This triggers a 'corrupt installation' warning from vscode.. worth it.
-      (self: super: {
-        vscode = pkgs-unstable.vscode.overrideAttrs (old: {
-          # This injects the CSS into the workbench.html, which is nicer and more reliable
-          # than doing it via JS on the fly via an extension which requires that I alter
-          # my file permissions so it can work its evil.
-          patches = [ ./patches/add-synthwave-css.patch ];
-        });
-      })
+      # (self: super: {
+      #   vscode = pkgs-unstable.vscode.overrideAttrs (old: {
+      #     # This injects the CSS into the workbench.html, which is nicer and more reliable
+      #     # than doing it via JS on the fly via an extension which requires that I alter
+      #     # my file permissions so it can work its evil.
+      #     patches = [ ./patches/add-synthwave-css.patch ];
+      #   });
+      # })
     ];
 
   # Let Home Manager install and manage itself.
@@ -73,8 +82,15 @@ in
     cachix
     dnsmasq
 
+    # gamez
+    pkgs-unstable.steam
+    pkgs-unstable.steam-run-native
+
     # editor shenanigans
     kakoune
+    pkgs-unstable.sublime3
+    pkgs-unstable.vscode
+    wrappedVSCode
     # pkgs-unstable.kak-lsp
     ghcide-nix.ghcide-ghc865
 
@@ -160,6 +176,7 @@ in
       gs = "git status";
       ob-standup = "zoom-us \"zoommtg://zoom-us/join?confno=9355149074\"";
       nivv = "GITHUB_TOKEN=${nivToken} niv";
+      # code = "code --user-data-dir ~/.config/vscode/data/ --extension-dir ~/.config/vscode/ext/";
     };
   };
 
@@ -321,94 +338,94 @@ in
   # }
   programs.vscode = {
     # package = pkgs-unstable.vscode; # Needs unstable home-manager
-    enable = true;
-    extensions = with pkgs.vscode-extensions; [
-        bbenoist.Nix
-        justusadam.language-haskell
-        ms-vscode.cpptools
+    # enable = true;
+    # extensions = with pkgs.vscode-extensions; [
+    #     bbenoist.Nix
+    #     justusadam.language-haskell
+    #     ms-vscode.cpptools
 
-      ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-        {
-          name = "haskell-linter";
-          publisher = "hoovercj";
-          version = "0.0.6";
-          sha256 = "0fb71cbjx1pyrjhi5ak29wj23b874b5hqjbh68njs61vkr3jlf1j";
-        }
-        {
-          name = "synthwave-x-fluoromachine";
-          publisher = "webrender";
-          version = "0.0.9";
-          sha256 = "1d43gfwja7nlfvrx1gb912vkv4p59g10agamlbkcy3sfv1kp9agx";
-        }
-        {
-          name = "git-project-manager";
-          publisher = "felipecaputo";
-          version = "1.7.1";
-          sha256 = "1pghgzs89qwp9bx6z749z6a00pfqm2416n4lmna6dhpk5671hah9";
-        }
-        {
-          name = "rewrap";
-          publisher = "stkb";
-          version = "1.9.1";
-          sha256 = "1gr51m2n0wgsijkh7nizja91ail9f83hmy5wy3h5j0xhgi3hpkar";
-        }
-        {
-          name = "code-spell-checker";
-          publisher = "streetsidesoftware";
-          version = "1.7.24";
-          sha256 = "09iv72k045w88ycqbmgirxn27a4fbd28skp7gyz9a6aing6rm3kj";
-        }
-        {
-          name = "vscode-pull-request-github";
-          publisher = "GitHub";
-          version = "0.14.0";
-          sha256 = "00x2nls2nmz9qc8hyp4nfgw300snr7l2dx5mc7y9ll11429iba6j";
-        }
-        {
-          name = "bracket-pair-colorizer";
-          publisher = "CoenraadS";
-          version = "1.0.61";
-          sha256 = "0r3bfp8kvhf9zpbiil7acx7zain26grk133f0r0syxqgml12i652";
-        }
-        {
-          name = "gitlens";
-          publisher = "eamodio";
-          version = "10.2.1";
-          sha256 = "1bh6ws20yi757b4im5aa6zcjmsgdqxvr1rg86kfa638cd5ad1f97";
-        }
-      ];
-    userSettings = {
-      "editor.tabSize" = 2;
-      "editor.fontFamily" = "Fira Code";
-      "editor.fontLigatures" = true;
-      "editor.rulers" = [80 90 100];
+    #   ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+    #     {
+    #       name = "haskell-linter";
+    #       publisher = "hoovercj";
+    #       version = "0.0.6";
+    #       sha256 = "0fb71cbjx1pyrjhi5ak29wj23b874b5hqjbh68njs61vkr3jlf1j";
+    #     }
+    #     {
+    #       name = "synthwave-x-fluoromachine";
+    #       publisher = "webrender";
+    #       version = "0.0.9";
+    #       sha256 = "1d43gfwja7nlfvrx1gb912vkv4p59g10agamlbkcy3sfv1kp9agx";
+    #     }
+    #     {
+    #       name = "git-project-manager";
+    #       publisher = "felipecaputo";
+    #       version = "1.7.1";
+    #       sha256 = "1pghgzs89qwp9bx6z749z6a00pfqm2416n4lmna6dhpk5671hah9";
+    #     }
+    #     {
+    #       name = "rewrap";
+    #       publisher = "stkb";
+    #       version = "1.9.1";
+    #       sha256 = "1gr51m2n0wgsijkh7nizja91ail9f83hmy5wy3h5j0xhgi3hpkar";
+    #     }
+    #     {
+    #       name = "code-spell-checker";
+    #       publisher = "streetsidesoftware";
+    #       version = "1.7.24";
+    #       sha256 = "09iv72k045w88ycqbmgirxn27a4fbd28skp7gyz9a6aing6rm3kj";
+    #     }
+    #     {
+    #       name = "vscode-pull-request-github";
+    #       publisher = "GitHub";
+    #       version = "0.14.0";
+    #       sha256 = "00x2nls2nmz9qc8hyp4nfgw300snr7l2dx5mc7y9ll11429iba6j";
+    #     }
+    #     {
+    #       name = "bracket-pair-colorizer";
+    #       publisher = "CoenraadS";
+    #       version = "1.0.61";
+    #       sha256 = "0r3bfp8kvhf9zpbiil7acx7zain26grk133f0r0syxqgml12i652";
+    #     }
+    #     {
+    #       name = "gitlens";
+    #       publisher = "eamodio";
+    #       version = "10.2.1";
+    #       sha256 = "1bh6ws20yi757b4im5aa6zcjmsgdqxvr1rg86kfa638cd5ad1f97";
+    #     }
+    #   ];
+    # userSettings = {
+    #   "editor.tabSize" = 2;
+    #   "editor.fontFamily" = "Fira Code";
+    #   "editor.fontLigatures" = true;
+    #   "editor.rulers" = [80 90 100];
 
-      "files.trimTrailingWhitespace" = true;
-      "files.associations" = {
-        "*.hsc" = "haskell";
-      };
+    #   "files.trimTrailingWhitespace" = true;
+    #   "files.associations" = {
+    #     "*.hsc" = "haskell";
+    #   };
 
-      "telemetry.enableCrashReporter" = false;
-      "telemetry.enableTelemetry" = false;
+    #   "telemetry.enableCrashReporter" = false;
+    #   "telemetry.enableTelemetry" = false;
 
-      "workbench.editor.highlightModifiedTabs" = true;
-      "workbench.iconTheme" = "vs-minimal";
-      "workbench.colorTheme" = "Synthwave x Fluoromachine";
+    #   "workbench.editor.highlightModifiedTabs" = true;
+    #   "workbench.iconTheme" = "vs-minimal";
+    #   "workbench.colorTheme" = "Synthwave x Fluoromachine";
 
-      "terminal.integrated.shell.linux" = "${pkgs.fish}/bin/fish";
+    #   "terminal.integrated.shell.linux" = "${pkgs.fish}/bin/fish";
 
-      "gitProjectManager.baseProjectsFolders" = [
-        "/home/manky/repos"
-      ];
+    #   "gitProjectManager.baseProjectsFolders" = [
+    #     "/home/manky/repos"
+    #   ];
 
-      "gitProjectManager.storeRepositoriesBetweenSessions" = true;
+    #   "gitProjectManager.storeRepositoriesBetweenSessions" = true;
 
-      # "rewrap.wrappingColumn" = 90;
-      "rewrap.wholeComment" = false;
-      "rewrap.doubleSentenceSpacing" = true;
+    #   # "rewrap.wrappingColumn" = 90;
+    #   "rewrap.wholeComment" = false;
+    #   "rewrap.doubleSentenceSpacing" = true;
 
-      "cSpell.language" = "en-GB";
-    };
+    #   "cSpell.language" = "en-GB";
+    # };
   };
 
   # home.file.".emacs.d/init.el".source = ~/repos/dootfeelz/editor/emacs/init.el;
@@ -481,11 +498,21 @@ in
     enableFishIntegration = true;
   };
 
+  programs.kitty = {
+    enable = true;
+    font.name = "Fira Code 11";
+    settings = {
+      enable_audio_bell = false;
+      copy_on_select = true;
+      allow_remote_control = true;
+    };
+  };
+
   programs.alacritty = {
     enable = true;
     settings = {
       font = {
-        size = 7.0;
+        size = 8.0;
         normal = {
           family = "Fira Code";
           style = "Regular";
