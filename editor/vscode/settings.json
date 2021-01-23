@@ -10,11 +10,11 @@
     "telemetry.enableTelemetry": false,
     "workbench.editor.highlightModifiedTabs": true,
     "gitProjectManager.baseProjectsFolders": [
-        "/home/manky/repos"
+        "~/repos"
     ],
     "gitProjectManager.maxDepthRecursion": 2,
     "gitProjectManager.codePath": {
-        "linux":"/home/manky/.nix-profile/bin/wcode"
+        "linux":"~/.nix-profile/bin/wcode"
     },
     "sequencediagrams.diagram.style": "simple",
     "sequencediagrams.preview.trigger": "onSave",
@@ -39,7 +39,7 @@
         "test"
     ],
     "projectManager.git.baseFolders": [
-        "/home/manky/repos"
+        "~/repos"
     ],
     "editor.rulers": [
         100
