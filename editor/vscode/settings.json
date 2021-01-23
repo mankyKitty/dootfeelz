@@ -1,0 +1,62 @@
+{
+    "editor.tabSize": 2,
+    "editor.fontFamily": "'Fantasque Sans Mono', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
+    "editor.fontLigatures": true,
+    "files.trimTrailingWhitespace": true,
+    "files.associations": {
+        "*.hsc": "haskell"
+    },
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
+    "workbench.editor.highlightModifiedTabs": true,
+    "gitProjectManager.baseProjectsFolders": [
+        "/home/manky/repos"
+    ],
+    "gitProjectManager.maxDepthRecursion": 2,
+    "gitProjectManager.codePath": {
+        "linux":"/home/manky/.nix-profile/bin/wcode"
+    },
+    "sequencediagrams.diagram.style": "simple",
+    "sequencediagrams.preview.trigger": "onSave",
+    "vim.easymotion": true,
+    "vim.easymotionMarkerFontWeight": "bold",
+    "vim.easymotionMarkerHeight": 16,
+    "vim.useSystemClipboard": true,
+    "vim.useCtrlKeys": false,
+    "vim.hlsearch": true,
+    "vim.textwidth": 100,
+    "vim.insertModeKeyBindings": [
+        {
+            "before": ["j", "k"],
+            "after": ["<Esc>"]
+        }
+    ],
+    "window.zoomLevel": 0,
+    "projectManager.any.ignoredFolders": [
+        "node_modules",
+        "out",
+        "typings",
+        "test"
+    ],
+    "projectManager.git.baseFolders": [
+        "/home/manky/repos"
+    ],
+    "editor.rulers": [
+        100
+    ],
+    "editor.wordWrapColumn": 100,
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wrappingIndent": "same",
+    "cSpell.enabled": true,
+    "cSpell.language": "en-GB",
+    "rust-client.disableRustup": true,
+    "rust.clippy_preference": "on",
+    "rust.crate_blacklist": [],
+    "workbench.colorTheme": "Monokai Pro",
+    "monokaiPro.fileIconsMonochrome": true,
+    "vim.handleKeys": {
+        "<C-d>": true
+    },
+    "crystal-lang.completion": true,
+    "C_Cpp.default.compilerArgs": ["-Wall"],
+    "C_Cpp.default.cppStandard": "c++14"
