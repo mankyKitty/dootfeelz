@@ -1,358 +1,559 @@
-#+TITLE: My Emacs Config (omg)
++TITLE: My Emacs Config (omg)
 #+AUTHOR: Sean Chalmers
 #+EMAIL: sclhiannan@gmail.com
 #+OPTIONS: num:nil
 
 * Sanity settings
-Disable tabs, we're not monsters
-#+BEGIN_SRC emacs-lisp
-(setq-default indent-tabs-mode nil)
+  Disable tabs, we're not monsters
+  #+BEGIN_SRC emacs-lisp
+    (setq-default indent-tabs-mode nil)
+    (setq-default electric-indent-inhibit t)
+  #+END_SRC
 
-#+END_SRC
+  Enable the unicodening to annoy jackd
+  #+begin_src emacs-lisp
+    (set-language-environment "UTF-8")
+    (set-default-coding-systems 'utf-8)
+  #+end_src
 
-Set a global tab width to two spaces
-#+BEGIN_SRC emacs-lisp
-(setq-default tab-width 2)
-#+END_SRC
+  Set a global tab width to two spaces
+  #+BEGIN_SRC emacs-lisp
+    (setq-default tab-width 2)
+  #+END_SRC
 
-Fix up some modes that have their own snowflake variables for indentation.
-#+BEGIN_SRC emacs-lisp
-(setq-default css-indent-offset 2)
-#+END_SRC
+  Fix up some modes that have their own snowflake variables for indentation.
+  #+BEGIN_SRC emacs-lisp
+    (setq-default css-indent-offset 2)
+  #+END_SRC
 
-Move our backups out of sight
-#+BEGIN_SRC emacs-lisp
-(setq backup-directory-alist `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
-#+END_SRC
-Set out GC threshold to 50Mb instead of 800Kb
-#+BEGIN_SRC emacs-lisp
-(setq gc-cons-threshold 50000000)
-#+END_SRC
+  Move our backups out of sight
+  #+BEGIN_SRC emacs-lisp
+    (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
+    (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+  #+END_SRC
+  Set out GC threshold to 50Mb instead of 800Kb
+  #+BEGIN_SRC emacs-lisp
+    (setq gc-cons-threshold 50000000)
+  #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
-;; Enable line highlight mode, because I find it useful.
-(global-hl-line-mode t)
-;; Column numbers too
-(column-number-mode t)
-;; Default fill-width
-(setq-default fill-column 90)
-;; Show trailing whitespace
-(setq-default show-trailing-whitespace t)
-;; Hide the scrollbar
-(toggle-scroll-bar -1)
-#+END_SRC
+  #+BEGIN_SRC emacs-lisp
+    ;; Enable line highlight mode, because I find it useful.
+    (global-hl-line-mode t)
+    ;; Column numbers too
+    (column-number-mode t)
+    ;; Default fill-width
+    (setq-default fill-column 100)
+    ;; Show trailing whitespace
+    (setq-default show-trailing-whitespace t)
+    ;; Hide the scrollbar
+    (toggle-scroll-bar -1)
+  #+END_SRC
 * Purdy
-Add some themey goodness.
-#+BEGIN_SRC emacs-lisp
-(use-package monokai-theme
-  :ensure t
-  :init
-  (load-theme 'monokai t))
-;; (use-package parchment-theme
-;;   :ensure t
-;;   :config (load-theme 'parchment t))
-#+END_SRC
+  Add some themey goodness.
+  #+BEGIN_SRC emacs-lisp
+    (use-package monokai-theme :ensure t)
+    (load-theme 'monokai t)
+    ;; (load-theme 'wombat t)
+    ;; (load-theme 'github-modern t)
+  #+END_SRC
 * Diminish and Delight
 ** Diminish
-#+BEGIN_SRC emacs-lisp
-(use-package diminish
-  :ensure t
-  :config
-  (diminish 'undo-tree-mode "UT")
-)
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package diminish
+       :ensure t
+       :config
+       (diminish 'undo-tree-mode "UT")
+       )
+   #+END_SRC
 ** Delight
-#+BEGIN_SRC emacs-lisp
-(use-package delight
-  :ensure t
-)
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package delight
+       :ensure t
+       )
+   #+END_SRC
 * =which-key= for discoverability
-#+BEGIN_SRC emacs-lisp
-(setq which-key-enable-extended-define-key t)
-(use-package which-key
-  :ensure t
-  :diminish which-key-mode
-  :init
-  (setq which-key-separator " ")
-  (setq which-key-prefix-prefix "+")
-  :config
-  (which-key-mode 1)
-)
+  #+BEGIN_SRC emacs-lisp
+    (setq which-key-enable-extended-define-key t)
+    (use-package which-key
+      :ensure t
+      :diminish which-key-mode
+      :init
+      (setq which-key-separator " ")
+      (setq which-key-prefix-prefix "+")
+      :config
+      (which-key-mode 1)
+      )
 
-(defun manky/add-leader-prefix-name (k n)
-  "Using the current evil-leader key, define a name for which-key to display"
-  (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " " k) n))
-#+END_SRC
+    (defun manky/add-leader-prefix-name (k n)
+      "Using the current evil-leader key, define a name for which-key to display"
+      (which-key-add-key-based-replacements (concat (symbol-value 'evil-leader/leader) " " k) n))
+  #+END_SRC
 
 * Evil mode for great justice
   With hopefully less RSI..
 
-#+BEGIN_SRC emacs-lisp
-(use-package evil
-  :ensure t
-  :config
-  (use-package evil-leader
-    :ensure t
-    :config
-    (global-evil-leader-mode 1)
-    (evil-leader/set-leader "<SPC>"))
+  #+BEGIN_SRC emacs-lisp
+    (use-package evil
+      :ensure t
+      :config
+      (use-package evil-leader
+        :ensure t
+        :config
+        (global-evil-leader-mode 1)
+        (evil-leader/set-leader "<SPC>"))
 
-  (use-package evil-surround
-    :ensure t
-    :config (global-evil-surround-mode))
+      (use-package evil-surround
+        :ensure t
+        :config (global-evil-surround-mode))
 
-  (use-package evil-escape
-    :ensure t
-    :diminish evil-escape-mode
-    :init (setq-default evil-escape-key-sequence "jk")
-    :config (evil-escape-mode 1))
+      (use-package evil-escape
+        :ensure t
+        :diminish evil-escape-mode
+        :init (setq-default evil-escape-key-sequence "jk")
+        :config (evil-escape-mode 1))
 
-  (use-package evil-nerd-commenter
-    :ensure t
-    :config
-    (manky/add-leader-prefix-name "c" "comments")
-    (evil-leader/set-key
-      "cl" 'evilnc-comment-or-uncomment-lines
-      "cc" 'evilnc-copy-and-comment-lines
-      "cp" 'evilnc-comment-or-uncomment-paragraphs
-      "cr" 'comment-or-uncomment-region
-      "cv" 'evilnc-toggle-invert-comment-line-by-line
-      "."  'evilnc-copy-and-comment-operator
-      "\\" 'evilnc-comment-operator ; if you prefer backslash key
+      (use-package evil-nerd-commenter
+        :ensure t
+        :config
+        (manky/add-leader-prefix-name "c" "comments")
+        (evil-leader/set-key
+          "cl" 'evilnc-comment-or-uncomment-lines
+          "cc" 'evilnc-copy-and-comment-lines
+          "cp" 'evilnc-comment-or-uncomment-paragraphs
+          "cr" 'comment-or-uncomment-region
+          "cv" 'evilnc-toggle-invert-comment-line-by-line
+          "."  'evilnc-copy-and-comment-operator
+          "\\" 'evilnc-comment-operator ; if you prefer backslash key
+          )
+        )
+      ;; (use-package evil-magit
+      ;;   ;; :ensure t
+      ;;   :after (evil magit)
+      ;;   )
+      (use-package powerline :ensure t)
+      (use-package powerline-evil
+        :ensure t
+        :after (powerline)
+        :config
+        (powerline-evil-vim-color-theme))
+      (evil-mode 1)
       )
-  )
-  (use-package powerline :ensure t)
-  (use-package powerline-evil
-    :ensure t
-    :after (powerline)
-    :config
-    (powerline-evil-vim-color-theme))
-  (evil-mode 1)
-)
-#+END_SRC
+  #+END_SRC
 
 * Avy for jumping
-#+BEGIN_SRC emacs-lisp
-(use-package avy
-  :ensure t
-  :config
-  (manky/add-leader-prefix-name "j" "avy")
-  (evil-leader/set-key
-    "j c" 'avy-goto-char
-    "j c" 'avy-goto-char
-    "j C" 'avy-goto-char-2
-    "j t" 'avy-goto-char-timer
-    "j l" 'avy-goto-line
-    "j w" 'avy-goto-word-1
-    "j W" 'avy-goto-word-0
-    "j o" 'avy-org-goto-heading-timer
-    "j R" 'avy-org-refile-as-child
-  )
-)
+  #+BEGIN_SRC emacs-lisp
+    (use-package avy
+      :ensure t
+      :config
+      (manky/add-leader-prefix-name "j" "avy")
+      (evil-leader/set-key
+        "j c" 'avy-goto-char
+        "j c" 'avy-goto-char
+        "j C" 'avy-goto-char-2
+        "j t" 'avy-goto-char-timer
+        "j l" 'avy-goto-line
+        "j w" 'avy-goto-word-1
+        "j W" 'avy-goto-word-0
+        "j o" 'avy-org-goto-heading-timer
+        "j R" 'avy-org-refile-as-child
+        )
+      )
   #+END_SRC
 * Clean up the Emacs UI
-#+BEGIN_SRC emacs-lisp
-(scroll-bar-mode -1)
-(tool-bar-mode   -1)
-(tooltip-mode    -1)
-(menu-bar-mode   -1)
-(setq-default inhibit-startup-screen t)
-;; (setq default-frame-alist '((font . "-ADBO-Source Code Pro-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")))
-;; (setq default-frame-alist '((font . "-POOP-Fixedsys Excelsior 3.01-normal-normal-normal-*-16-*-*-*-*-0-iso10646-1")))
-;; (setq default-frame-alist '((font . "-V.R.-PxPlus IBM VGA9-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")))
-;; (setq default-frame-alist '((font . "-CYEL-Iosevka-normal-normal-normal-*-14-*-*-*-d-0-iso10646-1")))
-;; (setq default-frame-alist '((font . "-UKWN-mononoki-normal-normal-normal-*-16-*-*-*-*-0-iso10646-1")))
-(setq default-frame-alist '((font . "-CTDB-Fira Code-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")))
-#+END_SRC
-* Async?!
-  Needed by =helm= and might be useful anyway.
-#+BEGIN_SRC emacs-lisp
-(use-package async
-  :ensure t
-  :config
-  (dired-async-mode 1)
-)
-#+END_SRC
-* Popups
-#+BEGIN_SRC emacs-lisp
-(use-package popup
-  :ensure t
-)
-#+END_SRC
-* Helm for fuzzy justice
   #+BEGIN_SRC emacs-lisp
-    (use-package helm
-      :ensure t
-      :diminish ""
-      :bind (
-      ("M-x" . helm-M-x)
-      ("C-x C-f" . helm-find-files)
-      ;; ("C-x c" . helm-command-prefix-key)
-      )
-      :config
-      (helm-mode 1)
-    )
-
-    (use-package helm-ag
-      :ensure t
-      :config
-      (custom-set-variables '(helm-ag-insert-at-point 'symbol))
-    )
+    (scroll-bar-mode -1)
+    (tool-bar-mode   -1)
+    (tooltip-mode    -1)
+    (menu-bar-mode   -1)
+    (setq-default inhibit-startup-screen t)
+    ;; (setq default-frame-alist '((font . "-ADBO-Source Code Pro-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")))
+    ;; (setq default-frame-alist '((font . "-POOP-Fixedsys Excelsior 3.01-normal-normal-normal-*-16-*-*-*-*-0-iso10646-1")))
+    ;; (setq default-frame-alist '((font . "-V.R.-PxPlus IBM VGA9-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")))
+    (setq default-frame-alist '((font . "-CYEL-Iosevka-normal-normal-normal-*-14-*-*-*-d-0-iso10646-1")))
+    ;; (setq default-frame-alist '((font . "-UKWN-mononoki-normal-normal-normal-*-13-*-*-*-*-0-iso10646-1")))
+    ;; (setq default-frame-alist '((font . "-CTDB-Fira Code-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")))
   #+END_SRC
-** Helm ls git
-  #+BEGIN_SRC emacs-lisp
-  (use-package helm-ls-git
-    :ensure t
-    :bind (("C-x C-d" . helm-browse-project))
+* Prescient
+  #+begin_src emacs-lisp
+  (use-package prescient :ensure t)
+  (use-package selectrum-prescient :ensure t :after (prescient))
+  (use-package company-prescient :ensure t :after (prescient))
+  #+end_src
+* Selectrum
+  #+begin_src emacs-lisp
+    (use-package selectrum
+      :ensure t
+      :after (selectrum-prescient)
+      :config
+      ;; to make sorting and filtering more intelligent
+      (selectrum-prescient-mode +1)
+      (selectrum-mode +1)
+
+      (defvar selectrum--toggle-project-data+ nil)
+
+      (defun selectrum-toggle-project-file-scope+ ()
+        "Toggle to project scope when reading file names.
+      Depends on `projectile'."
+        (interactive)
+        (unless minibuffer-completing-file-name
+          (user-error "Not reading file names"))
+        (require 'projectile)
+        (setq selectrum--previous-input-string nil)
+        (cond ((and selectrum--toggle-project-data+
+                    (string-match "in project: \\'"
+                                  (buffer-substring
+                                   (point-min) (minibuffer-prompt-end))))
+               (let ((inhibit-read-only t))
+                 (save-excursion
+                   (goto-char (minibuffer-prompt-end))
+                   (search-backward " in project")
+                   (delete-region (match-beginning 0)
+                                  (match-end 0)))
+                 (delete-minibuffer-contents))
+               (insert (car selectrum--toggle-project-data+))
+               (setq selectrum--preprocessed-candidates
+                     (cdr selectrum--toggle-project-data+))
+               (setq selectrum--toggle-project-data+ nil))
+              (t
+               (if-let ((input (selectrum-get-current-input))
+                        (project (projectile-project-root
+                                  (file-name-directory input))))
+                   (let* ((inhibit-read-only t)
+                          (ematch (file-name-nondirectory input))
+                          (cands
+                           (mapcar
+                            (lambda (i)
+                              (add-text-properties
+                               0 (length i)
+                               `(selectrum-candidate-full
+                                 ,(concat project i))
+                               i)
+                              i)
+                            (projectile-project-files project))))
+                     (save-excursion
+                       (goto-char (minibuffer-prompt-end))
+                       (search-backward ":")
+                       (insert
+                        (apply #'propertize
+                               " in project"
+                               (text-properties-at (point)))))
+                     (setq selectrum--toggle-project-data+
+                           (cons
+                            input
+                            selectrum--preprocessed-candidates))
+                     (delete-minibuffer-contents)
+                     (insert
+                      (concat (abbreviate-file-name project) ematch))
+                     (setq selectrum--preprocessed-candidates
+                           (lambda (input)
+                             (let ((ematch (file-name-nondirectory input)))
+                               `((input . ,ematch)
+                                 (candidates . ,cands))))))
+                 (user-error "Not in project")))))
+
+
+    ;; (push (cons "C-," 'selectrum-toggle-project-file-scope+) selectrum-minibuffer-bindings)
   )
+  #+end_src
+* Consult
+  #+begin_src emacs-lisp
+;; Example configuration for Consult
+(use-package consult
+  :ensure t
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  :bind (("C-x M-:" . consult-complex-command)
+         ("C-c h" . consult-history)
+         ("C-c m" . consult-mode-command)
+         ("C-c k" . consult-keep-lines)
+         ("C-c C-k" . consult-hide-lines)
+         ("C-x b" . consult-buffer)
+         ("C-x 4 b" . consult-buffer-other-window)
+         ("C-x 5 b" . consult-buffer-other-frame)
+         ("C-x r x" . consult-register)
+         ("C-x r b" . consult-bookmark)
+         ("M-g g" . consult-goto-line)
+         ("M-g M-g" . consult-goto-line)
+         ("M-g o" . consult-outline)       ;; "M-s o" is a good alternative.
+         ("M-g l" . consult-line)          ;; "M-s l" is a good alternative.
+         ("M-g m" . consult-mark)          ;; I recommend to bind Consult navigation
+         ("M-g k" . consult-global-mark)   ;; commands under the "M-g" prefix.
+         ("M-g r" . consult-git-grep)      ;; or consult-grep, consult-ripgrep
+         ("M-g f" . consult-find)          ;; or consult-locate, my-fdfind
+         ("M-g i" . consult-project-imenu) ;; or consult-imenu
+         ("M-g e" . consult-error)
+         ("M-s m" . consult-multi-occur)
+         ("M-y" . consult-yank-pop)
+         ("<help> a" . consult-apropos))
+
+  ;; The :init configuration is always executed (Not lazy!)
+  :init
+  ;; Custom command wrappers. It is generally encouraged to write your own
+  ;; commands based on the Consult commands. Some commands have arguments which
+  ;; allow tweaking. Furthermore global configuration variables can be set
+  ;; locally in a let-binding.
+  (defun my-fdfind (&optional dir)
+    (interactive "P")
+    (let ((consult-find-command '("fdfind" "--color=never" "--full-path")))
+      (consult-find dir)))
+
+  ;; Replace `multi-occur' with `consult-multi-occur', which is a drop-in replacement.
+  (fset 'multi-occur #'consult-multi-occur)
+
+  ;; Configure register preview function.
+  ;; This gives a consistent display for both `consult-register' and
+  ;; the register preview when editing registers.
+  (setq register-preview-delay 0
+        register-preview-function #'consult-register-preview)
+
+  ;; Configure other variables and modes in the :config section, after lazily loading the package
+  :config
+
+  ;; Configure preview. Note that the preview-key can also be configured on a
+  ;; per-command basis via `consult-config'.
+  ;; The default value is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key (kbd "M-p"))
+  ;; (setq consult-preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
+
+  ;; Optionally configure narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; (kbd "C-+")
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; Probably not needed if you are using which-key.
+  ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+  ;; Optional configure a view library to be used by `consult-buffer'.
+  ;; The view library must provide two functions, one to open the view by name,
+  ;; and one function which must return a list of views as strings.
+  ;; Example: https://github.com/minad/bookmark-view/
+  ;; (setq consult-view-open-function #'bookmark-jump
+  ;;       consult-view-list-function #'bookmark-view-names)
+
+  ;; Optionally configure a function which returns the project root directory
+  (autoload 'projectile-project-root "projectile")
+  (setq consult-project-root-function #'projectile-project-root))
+  #+end_src
+* Async?!
+  #+BEGIN_SRC emacs-lisp
+    (use-package async
+      :ensure t
+      :config
+      (dired-async-mode 1)
+      )
+  #+END_SRC
+* Popups
+  #+BEGIN_SRC emacs-lisp
+    (use-package popup
+      :ensure t
+      )
+  #+END_SRC
+* Treemacs
+** Treemacs main package
+   #+BEGIN_SRC emacs-lisp
+     (use-package treemacs
+       :ensure t
+       :config
+       (defun treemacs-ignore-flymake (file _)
+         (string-match-p (regexp-quote "_flymake\..+") file))
+       (push #'treemacs-ignore-flymake treemacs-ignored-file-predicates)
+       (treemacs-follow-mode))
+   #+END_SRC
+** Treemacs evil
+   #+BEGIN_SRC emacs-lisp
+     (use-package treemacs-evil
+       :ensure t
+       :after (treemacs evil)
+       )
+   #+END_SRC
+** Treemacs projectile
+   #+BEGIN_SRC emacs-lisp
+     ;; (use-package treemacs-projectile
+     ;;   ;; :ensure t
+     ;;   :after (treemacs projectile)
+     ;;   :config
+     ;;   (evil-leader/set-key
+     ;;     "pt" 'treemacs-add-and-display-project
+     ;;   )
+     ;; )
+   #+END_SRC
+* Display Line Numbers
+  #+BEGIN_SRC emacs-lisp
+    (use-package display-line-numbers
+      :ensure t
+      :config
+      (defun display-line-numbers--turn-on ()
+        "turn on line numbers but excempting certain major modes defined in `display-line-numbers-exempt-modes'"
+        (if (and
+             (not (member major-mode '(treemacs)))
+             (not (minibufferp)))
+            (display-line-numbers-mode)))
+      (global-display-line-numbers-mode)
+      )
   #+END_SRC
 * IEdit for many edited justices
   #+BEGIN_SRC emacs-lisp
-(use-package iedit
-  :ensure t
-  :bind (("C-;" . iedit-mode))
-)
+    (use-package iedit
+      :ensure t
+      :bind (("C-;" . iedit-mode))
+      )
   #+END_SRC
 * Projectile for project goodness
 ** Projectile
-#+BEGIN_SRC emacs-lisp
-  (use-package projectile
-    :ensure t
-    :after (helm)
-    :delight '(:eval (concat " " (projectile-project-name)))
-    :init
-    (setq projectile-require-project-root nil)
-    :config
-    ;; (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-    ;; (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-    (setq projectile-project-search-path '("~/repos"))
-    (projectile-mode +1)
-    (evil-leader/set-key
-      "p" 'projectile-command-map
-      )
-  )
-#+END_SRC
-** Helm projectile for fuzzy projects
-#+BEGIN_SRC emacs-lisp
-  (use-package helm-projectile
-    :ensure t
-    :config
-    (helm-projectile-on)
-
-    (manky/add-leader-prefix-name "p" "projects")
-    (evil-leader/set-key
-      "p p" 'helm-projectile-switch-project
-      "p f" 'helm-projectile-find-file
-      "p b" 'helm-projectile-switch-to-buffer
-      "p s" 'helm-projectile-ag
-
-      ;; helm-projectile-find-file-in-known-projects
-      ;; helm-projectile-find-file-dwim
-      ;; helm-projectile-find-dir
-      ;; helm-projectile-recentf
-    )
-  )
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package projectile
+       :ensure t
+       :delight '(:eval (concat " " (projectile-project-name)))
+       :init
+       (setq projectile-require-project-root nil)
+       :config
+       ;; (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+       ;; (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+       (setq projectile-project-search-path '("~/repos"))
+       (projectile-mode +1)
+       (evil-leader/set-key
+         "p" 'projectile-command-map
+         )
+       )
+   #+END_SRC
 * Minor Text/Layout utils
 ** aggressive-indent
-Not in use at the moment
-#+BEGIN_SRC emacs-lisp
-  (use-package aggressive-indent
-    :ensure t
-    :config
-    (evil-leader/set-key
-      "t a" 'aggressive-indent-mode
-    )
-  )
-#+END_SRC
+   Not in use at the moment
+   #+BEGIN_SRC emacs-lisp
+     (use-package aggressive-indent
+       :ensure t
+       :config
+       (evil-leader/set-key
+         "t a" 'aggressive-indent-mode
+         )
+       )
+   #+END_SRC
 
 ** rainbow-delimiters
-#+BEGIN_SRC emacs-lisp
-(use-package rainbow-delimiters
-  :ensure t
-  ;; There is no global mode, so...
-  :hook (prog-mode-hook . rainbow-delimiters-mode)
-)
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package rainbow-delimiters
+       :ensure t
+       ;; There is no global mode, so...
+       :hook (prog-mode-hook . rainbow-delimiters-mode)
+       )
+   #+END_SRC
 ** smartparens-config
-#+BEGIN_SRC emacs-lisp
-(use-package smartparens
-  :ensure t
-  :diminish (smartparens-mode . "()")
-  :config
-  (require 'smartparens-config)
-  (smartparens-global-mode t)
-  (show-paren-mode t)
-)
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package smartparens
+       :ensure t
+       :diminish (smartparens-mode . "()")
+       :config
+       (require 'smartparens-config)
+       (smartparens-global-mode t)
+       (show-paren-mode t)
+       )
+   #+END_SRC
 
 * Git!
-#+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :ensure t
-    :diminish magit-auto-revert-mode
-    :config
-    ;; (global-set-key (kbd "C-x g") 'magit-status)
-    (manky/add-leader-prefix-name "g" "git")
-    (evil-leader/set-key
-      "g s" 'magit-status)
-  )
-  (use-package forge
-    :ensure t
-    :after magit
-  )
-#+END_SRC
+  #+BEGIN_SRC emacs-lisp
+    (use-package magit
+      :ensure t
+      :diminish magit-auto-revert-mode
+      :config
+      ;; (global-set-key (kbd "C-x g") 'magit-status)
+      (manky/add-leader-prefix-name "g" "git")
+      (evil-leader/set-key
+        "g s" 'magit-status)
+      )
+    (use-package forge
+      :ensure t
+      :after magit
+      )
+  #+END_SRC
 * Direnv
   #+BEGIN_SRC emacs-lisp
-(use-package direnv
-  :ensure t
-  :config
-  (direnv-mode))
+    (use-package direnv
+      :ensure t
+      :config
+      (direnv-mode))
   #+END_SRC
 * Emmet for xml laziness
   Emmet coding is a life saver when you just have to write XML type things.
   #+BEGIN_SRC emacs-lisp
-(use-package emmet-mode
-  :ensure t
-  :init
-  (add-hook 'sgml-mode-hook 'emmet-mode) ;; Autostart on markup modes
-  (add-hook 'css-mode-hook 'emmet-mode) ;; Emmet has CSS prefix helpers
-  (setq emmet-move-cursor-between-quotes t) ;; Move to between the inserted tags
+    (use-package emmet-mode
+      :ensure t
+      :init
+      (add-hook 'sgml-mode-hook 'emmet-mode) ;; Autostart on markup modes
+      (add-hook 'css-mode-hook 'emmet-mode) ;; Emmet has CSS prefix helpers
+      (setq emmet-move-cursor-between-quotes t) ;; Move to between the inserted tags
 
-  ;; Not sure if I need this one yet, but I'll know it when I hit it
-  ;; (setq emmet-self-closing-tag-style " /") ;; default "/"
-  ;; only " /", "/" and "" are valid.
-  ;; eg. <meta />, <meta/>, <meta>
-)
+      ;; Not sure if I need this one yet, but I'll know it when I hit it
+      ;; (setq emmet-self-closing-tag-style " /") ;; default "/"
+      ;; only " /", "/" and "" are valid.
+      ;; eg. <meta />, <meta/>, <meta>
+      )
   #+END_SRC
 
 * Nix/OS integration & tools
 ** Nix file mode
-Gotta get that highlighting...
-#+BEGIN_SRC emacs-lisp
-(use-package nix-mode
-  :ensure t
-  :mode ("\\.nix\\'" . 'nix-mode)
-  :init
-  (defun manky/nix-indent ()
-    (make-local-variable 'indent-line-function)
-    (setq indent-line-function 'nix-indent-line)
-    (setq nix-indent-function 'nix-indent-line)
-    )
+   Gotta get that highlighting...
+   #+BEGIN_SRC emacs-lisp
+     (use-package nix-mode
+       :ensure t
+       :mode ("\\.nix\\'" . 'nix-mode)
+       :init
+       (defun manky/nix-indent ()
+         (make-local-variable 'indent-line-function)
+         (setq indent-line-function 'nix-indent-line)
+         (setq nix-indent-function 'nix-indent-line)
+         )
 
-  (add-hook 'nix-mode-hook 'manky/nix-indent)
-  )
-#+END_SRC
+       (add-hook 'nix-mode-hook 'manky/nix-indent)
+       )
+   #+END_SRC
 ** Nix sandbox
+   #+BEGIN_SRC emacs-lisp
+     (use-package nix-sandbox
+       :ensure t
+       :after nix-mode
+       )
+   #+END_SRC
+* Language Modes!! OMG
+** OCaml
+   #+begin_src emacs-lisp
+     (use-package tuareg
+       :ensure t
+       :load-path "~/.nix-profile/share/emacs/site-lisp"
+     )
+     (use-package merlin
+       :ensure t
+       :init
+       (add-to-list 'load-path "~/.nix-profile/share/emacs/site-lisp")
+       (setq merlin-command "ocamlmerlin")
+       :config
+       (add-hook 'tuareg-mode-hook 'merlin-mode t)
+     )
+     (use-package ocp-indent :ensure t)
+     #+end_src
+** Elixir
+   #+BEGIN_SRC emacs-lisp
+
+     (use-package mix :ensure t)
+     (use-package elixir-mode
+       :ensure t
+       :init
+       ;; (add-hook 'elixir-mode-hook 'mix-minor-mode)
+       )
+
+   #+END_SRC
+
+** Rakudo!!
 #+BEGIN_SRC emacs-lisp
-(use-package nix-sandbox
-  :ensure t
-  :after nix-mode
+  (use-package raku-mode
+    :ensure t
+    :defer t
   )
 #+END_SRC
-* Language Modes!! OMG
+** Crystal
+#+BEGIN_SRC emacs-lisp
+(use-package crystal-mode
+  :ensure t
+)
+#+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp
 (use-package haskell-mode
@@ -394,19 +595,6 @@ Gotta get that highlighting...
 (use-package ormolu
  :ensure t
  :bind (:map haskell-mode-map ("C-c r" . ormolu-format-buffer)))
-#+END_SRC
-
-*** Structured Haskell (omg)
-    Just ... doesn't work. :/
-#+BEGIN_SRC emacs-lisp
-;; (use-package shm
-;;   :load-path "~/repos/structured-haskell-mode/elisp/"
-;;   :hook (haskell-mode . structured-haskell-mode)
-;;   :init
-;;   (setq shm-program-name "/home/manky/repos/structured-haskell-mode/result/bin/structured-haskell-mode")
-;;   :config
-;;   (haskell-indentation-mode -1)
-;; )
 #+END_SRC
 ** JSON
 *heavy sigh*
@@ -466,6 +654,81 @@ Gotta get that highlighting...
   :hook (rust-mode . cargo-minor-mode)
 )
 #+END_SRC
+** Zig
+#+begin_src emacs-lisp
+(use-package zig-mode
+  :ensure t
+)
+#+end_src
+** Pony
+#+begin_src emacs-lisp
+(use-package ponylang-mode
+  :ensure t
+)
+#+end_src
+** Nim
+#+BEGIN_SRC emacs-lisp
+(use-package nim-mode
+  :ensure t
+  :hook (nim-mode . (lambda ()
+    ; Prevent editing of nimble files by accident
+    (when (string-match "/\.nimble/" buffer-file-name) (read-only-mode 1))
+    (auto-fill-mode 0)
+    (electric-indent-local-mode 0)
+  ))
+  :config
+  (manky/add-leader-prefix-name "n" "nim")
+  (evil-leader/set-key
+    "n >" 'nim-indent-shift-right
+    "n <" 'nim-indent-shift-left
+  )
+)
+#+END_SRC
+** Scala
+#+BEGIN_SRC emacs-lisp
+(use-package scala-mode
+  :ensure t
+)
+#+END_SRC
+** Factor
+#+BEGIN_SRC emacs-lisp
+  (use-package fuel
+    :ensure t
+    :mode ("\\.factor\\'" . factor-mode)
+    :config
+    ;; (setq-default fuel-listener-factor-binary (shell-command-to-string "echo -n (which factore)"))
+    (setq fuel-listener-factor-binary "factor"))
+#+END_SRC
+** Graphviz
+   #+BEGIN_SRC emacs-lisp
+   (use-package graphviz-dot-mode
+     :ensure t
+     :mode ("\\.dot\\'" . graphviz-dot-mode)
+     )
+   #+END_SRC
+** D Language
+   #+begin_src emacs-lisp
+     (use-package d-mode
+       :ensure t
+       :mode ("\\.d[i]?\\'" . d-mode)
+     )
+   #+end_src
+** Gleam!
+   #+begin_src emacs-lisp
+     (use-package gleam-mode
+       :load-path "/home/manky/.emacs.d/gleam-mode"
+       :mode ("\\.gleam\\'" . gleam-mode)
+     )
+   #+end_src
+** F#
+   #+begin_src emacs-lisp
+     (use-package fsharp-mode
+       :ensure t
+       :defer t
+       :mode ("\\.fs\\'" . fsharp-mode)
+     )
+   #+end_src
+
 * Checking & Linting
 We need to poke some =.dirlocal= powers to make dante really shine
 Setup the dante project values according to the proposed layout for
@@ -553,13 +816,14 @@ Try to fix the issue at the cursor
 * Smart Mode Line
 Clean up the mode line a bit as it gets a bit busy by default.
 #+BEGIN_SRC emacs-lisp
-(use-package smart-mode-line-powerline-theme
-  :ensure t
-)
+;; (use-package smart-mode-line-powerline-theme
+;;   :ensure t
+;; )
 (use-package smart-mode-line
   :ensure t
   :config
-  (setq sml/theme 'smart-mode-line-powerline)
+  (setq sml/theme 'light)
+  ;; (setq sml/theme 'smart-mode-line-powerline)
   (setq sml/no-confirm-load-theme t)
   (add-hook 'after-init-hook 'sml/setup)
 )
@@ -580,6 +844,7 @@ Clean up the mode line a bit as it gets a bit busy by default.
 (manky/add-leader-prefix-name "x" "text") ;; spacemacs muscle memory
 (manky/add-leader-prefix-name "f" "file")
 (manky/add-leader-prefix-name "b" "buffer")
+(manky/add-leader-prefix-name "t" "toggle")
 (which-key-add-key-based-replacements "SPC TAB" "Prev buffer")
 (global-set-key (kbd "C-z") 'undo)
 (global-set-key (kbd "C-x C-z") 'undo-tree-mode)
@@ -593,6 +858,8 @@ Clean up the mode line a bit as it gets a bit busy by default.
    #+BEGIN_SRC emacs-lisp
      "x a r" 'align-regexp
      "x d w" 'delete-trailing-whitespace
+
+     "t f" 'auto-fill-mode
 
    #+END_SRC
 
@@ -611,6 +878,15 @@ Clean up the mode line a bit as it gets a bit busy by default.
 
    #+END_SRC
 
+** Elisp
+   #+BEGIN_SRC emacs-lisp
+   "s e p" 'eval-print-last-sexp
+   "s e l" 'eval-last-sexp
+   "s e r" 'eval-region
+   "s e b" 'eval-buffer
+   "s e d" 'eval-defun
+   "s e e" 'eval-expression
+   #+END_SRC
 ** ...has an end, Neo.
 #+BEGIN_SRC emacs-lisp
 )
@@ -706,12 +982,6 @@ Clean up the mode line a bit as it gets a bit busy by default.
   :after (company-mode lsp-mode)
   :commands company-lsp)
  #+end_src
-** ~helm-lsp~
- #+begin_src emacs-lisp
-(use-package helm-lsp
-  :ensure t
-  :after (lsp-mode))
-   #+end_src
 ** ~lsp-treemacs~
    Workspace wide error navigation/overview
    #+begin_src emacs-lisp
@@ -748,9 +1018,6 @@ Clean up the mode line a bit as it gets a bit busy by default.
    #+begin_src emacs-lisp
    (evil-leader/set-key
      "l e" 'lsp-treemacs-errors-list
-     "l a" 'helm-lsp-code-actions
-     "l t" 'helm-lsp-workspace-symbol
-     "l T" 'helm-lsp-global-workspace-symbol
      "l f" 'lsp-format-buffer
 
      "L s" 'lsp

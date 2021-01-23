@@ -30,11 +30,12 @@ Plug 'benekastah/neomake'
 Plug 'mattn/emmet-vim'
 Plug 'neovimhaskell/haskell-vim'
 Plug 'kien/ctrlp.vim'
-Plug 'kchmck/vim-coffee-script'
 Plug 'Shougo/deoplete.nvim'
 Plug 'bling/vim-airline'
 Plug 'scrooloose/nerdtree'
 Plug 'tpope/vim-surround'
+Plug 'vim-crystal/vim-crystal'
+Plug 'Raku/vim-raku' 
 
 " Te he
 Plug 'alex-ren/org.ats-lang.toolats', { 'rtp': 'org.ats-lang.toolats.vim' }

@@ -1,19 +1,20 @@
+import           System.Exit                (exitWith, ExitCode (..))
 import           Control.Monad              (forM_, join)
 import           Data.Function              (on)
-import           Data.List                  (sortBy)
+import           Data.List                  (sortBy, isSuffixOf)
 import qualified Data.Map                   as M
 import           Data.Monoid                ((<>))
 
 import qualified Graphics.X11.Types         as XT
 import           XMonad                     (Full (..), Layout, ManageHook,
-                                             Mirror (..), Tall (..), X,
+                                             Mirror (..), Tall (..), X,title,
                                              XConfig (..), def, spawn, windows, io,
                                              xmonad, (.|.), (|||), gets, windowset)
 import           XMonad.Actions.SpawnOn     (manageSpawn, spawnOn)
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.EwmhDesktops  (ewmh)
 import           XMonad.Hooks.ManageDocks   (avoidStruts, docks, manageDocks)
-import           XMonad.ManageHook          (className, composeAll, doShift,
+import           XMonad.ManageHook          (className, composeAll, doShift, doFloat,
                                              (-->), (<+>), (=?))
 import qualified XMonad.StackSet            as W
 import           XMonad.Util.NamedWindows   (getName)
@@ -22,6 +23,7 @@ import           XMonad.Util.Run            (safeSpawn)
 import           XMonad.Layout.Circle
 import           XMonad.Layout.Grid
 import           XMonad.Layout.ThreeColumns
+import           XMonad.Prompt.ConfirmPrompt
 
 -- Some keys for later
 -- ((0, XT.xK_Print), spawn "maim -c 1,0,0,0.6 -s ~/screenshots/$(date +%F_%T).png")
@@ -50,6 +52,7 @@ myKeys conf@XConfig {modMask = modm} =
                    , ((0, xK_X86AudioPlay), spawn (spotifySend "PlayPause"))
                    , ((0, xK_X86AudioNext), spawn (spotifySend "Next"))
                    , ((0, xK_X86AudioPrev), spawn (spotifySend "Previous"))
+                   , ((modm , XT.xK_q), confirmPrompt def "GOOBER!! Did you even mean to quit?" $ io (exitWith ExitSuccess))
                    ]
   in kees <> keys def conf
 
@@ -85,6 +88,11 @@ eventLogHook = do
       | currWs == ws = "[" <> ws <> "]"
       | otherwise = " " <> ws <> " "
 
+
+myManageHooks = composeAll $ concat
+  [ [ fmap ("(DEBUG)" `isSuffixOf`) title --> doFloat ]
+  ]
+
 -- docks: add dock (panel) functionality to your configuration
 -- ewmh: https://en.wikipedia.org/wiki/Extended_Window_Manager_Hints - lets XMonad talk to panels
 main :: IO ()
@@ -99,7 +107,7 @@ main = do
     -- avoidStruts tells windows to avoid the "strut" where docks live
     , layoutHook = avoidStruts myLayout
     , logHook = eventLogHook
-    , manageHook = manageSpawn <+> manageDocks <+> manageHook def
+    , manageHook = (myManageHooks <+> manageHook def) <+> manageSpawn <+> manageDocks
     , workspaces =
       [ "1:code"
       , "2:browser (other)"

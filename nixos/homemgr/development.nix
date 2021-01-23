@@ -1,8 +1,8 @@
 { config, pkgs, unstable, ... }:
 let
   pkgs-unstable = import <nixpkgs-unstable> {};
-  all-hies = import (fetchTarball "https://github.com/infinisil/all-hies/tarball/master") {};
-  justHaskStatics = pkgs.haskell.lib.justStaticExecutables;
+  # all-hies = import (fetchTarball "https://github.com/infinisil/all-hies/tarball/master") {};
+  # justHaskStatics = pkgs.haskell.lib.justStaticExecutables;
 in
 {
   home.packages = with pkgs; [
@@ -28,6 +28,6 @@ in
       bytestring
     ]))
     # (justHaskStatics haskell-ci)
-    (all-hies.selection { selector = p: { inherit (p) ghc864 ghc865; }; })
+    # (all-hies.selection { selector = p: { inherit (p) ghc864 ghc865; }; })
   ]);
 }

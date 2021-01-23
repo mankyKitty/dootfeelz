@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 let
   from-home = dir: ./repos/dootfeelz/nixos/homemgr + dir;
-  pkgs-unstable = import <nixpkgs-unstable> {};
+  pkgs-unstable = import <nixpkgs-unstable> { config = { allowBroken = true; allowUnfree = true; }; };
   ghcide-nix = import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/master") {};
 
   nivToken = "2578eeea7034fb742727846f1ac3eba02fd9762c";
@@ -21,11 +21,76 @@ let
   kakImport = name: ''source "${name}"'';
   allKakImports = dir: builtins.concatStringsSep "\n" (map kakImport (allKakFiles dir));
 
+  vsCodeWithSomeExtensions = pkgs-unstable.vscode-with-extensions.override (_: {
+    vscodeExtensions = with pkgs-unstable.vscode-extensions; [
+      bbenoist.Nix
+      ms-vscode.Go
+      ms-vscode.cpptools
+      justusadam.language-haskell
+      skyapps.fish-vscode
+      vscodevim.vim
+    ] ++ pkgs-unstable.vscode-utils.extensionsFromVscodeMarketplace [
+      {
+        name = "project-manager";
+        publisher = "alefragnani";
+        version = "12.0.1";
+        sha256 = "1bckjq1dw2mwr1zxx3dxs4b2arvnxcr32af2gxlkh4s26hvp9n1v";
+      }
+      {
+        name = "nix-env-selector";
+        publisher = "arrterian";
+        version = "0.1.2";
+        sha256 = "1n5ilw1k29km9b0yzfd32m8gvwa2xhh6156d4dys6l8sbfpp2cv9";
+      }
+      {
+        name = "bracket-pair-colorizer";
+        publisher = "coenraads";
+        version = "1.0.61";
+        sha256 = "0r3bfp8kvhf9zpbiil7acx7zain26grk133f0r0syxqgml12i652";
+      }
+      {
+        publisher = "faustinoaq";
+        name = "crystal-lang";
+        version = "0.4.0";
+        sha256 = "04dnyap8hl2a25kh5r5jv9bgn4535pxdaa77r1cj9hmsadqd4sgr";
+      }
+      {
+        publisher = "freebroccolo";
+        name = "reasonml";
+        version = "1.0.38";
+        sha256 = "1nay6qs9vcxd85ra4bv93gg3aqg3r2wmcnqmcsy9n8pg1ds1vngd";
+      }
+      {
+        publisher = "gleam";
+        name = "gleam";
+        version = "1.0.0";
+        sha256 = "0r8k7y1247dmd0jc1d5pg31cfxi7q849x5psajw8h2s4834c4dk9";
+      }
+      {
+        publisher = "kahole";
+        name = "magit";
+        version = "0.6.2";
+        sha256 = "0qr11k4n96wnsc2rn77i01dmn0zbaqj32wp9cblghhr6h5vs2y9h";
+      }
+      {
+        publisher = "xaver";
+        name = "clang-format";
+        version = "1.9.0";
+        sha256 = "0bwc4lpcjq1x73kwd6kxr674v3rb0d2cjj65g3r69y7gfs8yzl5b";
+      }
+      {
+        publisher = "monokai";
+        name = "theme-monokai-pro-vscode";
+        version = "1.1.18";
+        sha256 = "0dg68z9h84rpwg82wvk74fw7hyjbsylqkvrd0r94ma9bmqzdvi4x";
+      }
+    ];
+  } );
+
   wrappedVSCode = pkgs.writeScriptBin "wcode" ''
     #!${pkgs.stdenv.shell}
-    exec ${pkgs-unstable.vscode}/bin/code \
+    exec ${vsCodeWithSomeExtensions}/bin/code \
      --user-data-dir ~/.config/vscode/data/ \
-     --extensions-dir ~/.config/vscode/ext/ \
      "$\{extraFlagsArray[@]\}" \
      "$@"
   '';
@@ -38,22 +103,39 @@ in
   nixpkgs.overlays =
     [ (import ./overlays/stevenblack-hosts.nix)
       (import ./overlays/kak-fzf)
-      (import ./overlays/lorri)
       (import ./overlays/kakoune)
       (import ./overlays/kakoune-selenized)
+      (import ./overlays/ormolu)
 
-      # Get the theme of synth.
-      (import ./overlays/synthwave-x-fluoromachine)
+      # Fixing NSS & Slack behaviour
+      (_: super:  {
+        slack = super.slack.override {
+          nss = pkgs-unstable.nss_3_44;
+        };
+      })
 
-      # This triggers a 'corrupt installation' warning from vscode.. worth it.
-      # (self: super: {
-      #   vscode = pkgs-unstable.vscode.overrideAttrs (old: {
-      #     # This injects the CSS into the workbench.html, which is nicer and more reliable
-      #     # than doing it via JS on the fly via an extension which requires that I alter
-      #     # my file permissions so it can work its evil.
-      #     patches = [ ./patches/add-synthwave-css.patch ];
-      #   });
-      # })
+      (_: super: {
+        sublime4 = super.callPackage ./packages/sublime4 {};
+      })
+
+      (_: super: {
+        zoom-us = super.libsForQt5.callPackage ./packages/zoom-us {};
+      })
+
+      # KDB+ !
+      (_: super: {
+        kdbplus = super.callPackage_i686 ./packages/kdbplus {};
+      })
+
+      # Fix up the weird renaming of the factor binary
+      (_: super: {
+        factor-lang = super.callPackage ./packages/factor-lang {
+          gtkglext = super.gnome2.gtkglext;
+        };
+      })
+
+      # Sbtix (scala build helper for nixpkgs)
+      (import ./overlays/sbtix)
     ];
 
   # Let Home Manager install and manage itself.
@@ -61,12 +143,13 @@ in
 
   imports = [
     ./development.nix
-    ./polybar.nix
+    # ./polybar.nix
     ./dunst.nix
   ];
 
   # Misc apps etc
   home.packages = with pkgs; [
+    sbtix
     # system
     file
     cacert
@@ -81,22 +164,33 @@ in
     stevenblack-hosts
     cachix
     dnsmasq
+    fmt
+    pkgs-unstable.openssl.dev
+    ncdu
+
+    aspell
+    aspellDicts.en
+
+    git-crypt
 
     # gamez
     pkgs-unstable.steam
-    pkgs-unstable.steam-run-native
 
     # editor shenanigans
+    pkgs-unstable.sublime-merge
+    sublime4
     kakoune
-    pkgs-unstable.sublime3
     pkgs-unstable.vscode
     wrappedVSCode
-    # pkgs-unstable.kak-lsp
-    ghcide-nix.ghcide-ghc865
+    pkgs-unstable.ormolu
 
     # languages
     # pkgs-unstable.mercury
     pkgs-unstable.exercism
+    # pkgs-unstable.racket
+    factor-lang
+    gforth
+    kdbplus
 
     # turtle power
     shellcheck
@@ -106,7 +200,7 @@ in
     tree
     html2text
     pkgs-unstable.silver-searcher
-    lorri
+    pkgs-unstable.lorri
     pkgs-unstable.universal-ctags
     pkgs-unstable.entr
     pkgs-unstable.cool-retro-term
@@ -116,16 +210,22 @@ in
     pandoc
     shutter
     thunderbird
-    zoom-us
-    signal-desktop
+    simplescreenrecorder
+    pkgs-unstable.keybase-gui
+    pkgs-unstable.zeal
     krita
-    gnome3.pomodoro
     libreoffice
     pkgs-unstable.postman
+    pkgs-unstable.signal-desktop
+
+    # Sigh...
+    pkgs-unstable.ledger-live-desktop
+    pkgs-unstable.ledger-udev-rules
 
     # fonts
     iosevka
     mononoki
+    roboto-mono
     font-awesome-ttf
 
     # nix-tility
@@ -134,79 +234,57 @@ in
 
     # omg unfree!
     spotify
+    playerctl
     epiphany
     pkgs-unstable.discord
     pkgs-unstable.brave
+    slack
+    zoom-us
   ];
 
+  programs.feh.enable = true;
   programs.jq.enable = true;
   programs.htop.enable = true;
 
+  programs.taskwarrior.enable = true;
+
   programs.fish = {
     enable = true;
-    # promptInit = ''
-    # function fish_prompt -d "my nix fish"
-    #   set -l nix_shell_info (
-    #     if set -q IN_NIX_SHELL
-    #       echo -n -s " <nix-shell> "
-    #     end
-    #   )
-    #   set -l color_cwd
-    #   set -l suffix
-    #   switch "$USER"
-    #       case root toor
-    #           if set -q fish_color_cwd_root
-    #               set color_cwd $fish_color_cwd_root
-    #           else
-    #               set color_cwd $fish_color_cwd
-    #           end
-    #           set suffix '#'
-    #       case '*'
-    #           set color_cwd $fish_color_cwd
-    #           set suffix '>'
-    #   end
-    #   echo -n -s "$USER" @ (prompt_hostname) ' ' (set_color $color_cwd) (prompt_pwd) (set_color normal) "$nix_shell_info$suffix "
-    # end
-
-    # starship init fish | source
-    # '';
-    shellAliases = {
+      shellAliases = {
       # ghci = "ghci -interactive-print=Text.Pretty.Simple.pPrint -package pretty-simple";
       ns = "nix-shell $argv --command fish";
       gs = "git status";
       ob-standup = "zoom-us \"zoommtg://zoom-us/join?confno=9355149074\"";
       nivv = "GITHUB_TOKEN=${nivToken} niv";
-      # code = "code --user-data-dir ~/.config/vscode/data/ --extension-dir ~/.config/vscode/ext/";
+      sb = "nix-shell -p openssl --command subl";
+      sstop = "systemctl --user stop xscreensaver.service";
+      sstart = "systemctl --user restart xscreensaver.service";
     };
   };
 
   home.file.".ghci".source = ~/repos/dootfeelz/nixos/homemgr/.ghci_config;
-  # home.file.".config/nvim/init.vim".source = ~/repos/dootfeelz/editor/neovim/init.vim;
+  home.file.".config/nvim/init.vim".source = ~/repos/dootfeelz/editor/neovim/init.vim;
+  home.file.".fehbg" = {
+    executable = true;
+    onChange = "/home/manky/.fehbg";
+    text = ''
+    #!/usr/bin/env bash
+    ${pkgs.feh}/bin/feh --no-fehbg --bg-center '/home/manky/pictures/radnom/depressurisation.png'
+    '';
+  };
+
+  programs.neovim = {
+    enable = true;
+    viAlias = true;
+    vimAlias = true;
+    withPython3 = true;
+  };
 
   programs.firefox.enable = true;
   programs.chromium.enable = true;
   programs.fzf.enable = true;
 
-  # Fix this to use a 'toTOML' generators
-  # At least at some point when kak-lsp is more useful for haskell projects... ;<
-  # home.file.".config/kak-lsp/kak-lsp.toml".text  = ''
-  #   snippet_support = false
-  #   verbosity = 2
-
-  #   # exit session if no requests were received during given period in seconds
-  #   # works only in unix sockets mode (-s/--session)
-  #   # set to 0 to disable
-  #   [server]
-  #   timeout = 1800 # seconds = 30 minutes
-
-  #   [language.haskell]
-  #   filetypes = ["haskell"]
-  #   roots = ["Setup.hs", "stack.yaml", "*.cabal"]
-  #   command = "hie-wrapper"
-  #   args = ["--lsp"]
-  # '';
-
-  home.file.".config/kak/colors" = {
+   home.file.".config/kak/colors" = {
     source = pkgs.kakoune-selenized + /colors;
     recursive = true;
   };
@@ -214,7 +292,7 @@ in
   programs.kakoune = {
     enable = true;
     config = {
-      colorScheme = "base16";
+      colorScheme = "kaleidoscope-light";
       numberLines.enable = true;
       showWhitespace.enable = true;
       tabStop = 2;
@@ -253,6 +331,8 @@ in
         exec <esc>
       }}
 
+      map global normal = '|${pkgs-unstable.fmt}/bin/fmt -w $kak_opt_autowrap_column<ret>'
+
       hook global BufCreate .*[.](hsc) %{
           set-option buffer filetype haskell
       }
@@ -288,7 +368,6 @@ in
       define-command mkdir %{ nop %sh{ mkdir -p $(dirname $kak_buffile) } }
       set-option global grepcmd 'ag --column'
       add-highlighter global/ show-matching
-      add-highlighter global/ show-whitespaces
 
       def suspend-and-resume \
           -params 1..2 \
@@ -329,104 +408,16 @@ in
     '';
   };
 
-  # To add an extension, use this template:
-  # {
-  #   name = "git-project-manager";
-  #   publisher = "felipecaputo";
-  #   version = "1.7.1";
-  #   sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-  # }
-  programs.vscode = {
-    # package = pkgs-unstable.vscode; # Needs unstable home-manager
-    # enable = true;
-    # extensions = with pkgs.vscode-extensions; [
-    #     bbenoist.Nix
-    #     justusadam.language-haskell
-    #     ms-vscode.cpptools
-
-    #   ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-    #     {
-    #       name = "haskell-linter";
-    #       publisher = "hoovercj";
-    #       version = "0.0.6";
-    #       sha256 = "0fb71cbjx1pyrjhi5ak29wj23b874b5hqjbh68njs61vkr3jlf1j";
-    #     }
-    #     {
-    #       name = "synthwave-x-fluoromachine";
-    #       publisher = "webrender";
-    #       version = "0.0.9";
-    #       sha256 = "1d43gfwja7nlfvrx1gb912vkv4p59g10agamlbkcy3sfv1kp9agx";
-    #     }
-    #     {
-    #       name = "git-project-manager";
-    #       publisher = "felipecaputo";
-    #       version = "1.7.1";
-    #       sha256 = "1pghgzs89qwp9bx6z749z6a00pfqm2416n4lmna6dhpk5671hah9";
-    #     }
-    #     {
-    #       name = "rewrap";
-    #       publisher = "stkb";
-    #       version = "1.9.1";
-    #       sha256 = "1gr51m2n0wgsijkh7nizja91ail9f83hmy5wy3h5j0xhgi3hpkar";
-    #     }
-    #     {
-    #       name = "code-spell-checker";
-    #       publisher = "streetsidesoftware";
-    #       version = "1.7.24";
-    #       sha256 = "09iv72k045w88ycqbmgirxn27a4fbd28skp7gyz9a6aing6rm3kj";
-    #     }
-    #     {
-    #       name = "vscode-pull-request-github";
-    #       publisher = "GitHub";
-    #       version = "0.14.0";
-    #       sha256 = "00x2nls2nmz9qc8hyp4nfgw300snr7l2dx5mc7y9ll11429iba6j";
-    #     }
-    #     {
-    #       name = "bracket-pair-colorizer";
-    #       publisher = "CoenraadS";
-    #       version = "1.0.61";
-    #       sha256 = "0r3bfp8kvhf9zpbiil7acx7zain26grk133f0r0syxqgml12i652";
-    #     }
-    #     {
-    #       name = "gitlens";
-    #       publisher = "eamodio";
-    #       version = "10.2.1";
-    #       sha256 = "1bh6ws20yi757b4im5aa6zcjmsgdqxvr1rg86kfa638cd5ad1f97";
-    #     }
-    #   ];
-    # userSettings = {
-    #   "editor.tabSize" = 2;
-    #   "editor.fontFamily" = "Fira Code";
-    #   "editor.fontLigatures" = true;
-    #   "editor.rulers" = [80 90 100];
-
-    #   "files.trimTrailingWhitespace" = true;
-    #   "files.associations" = {
-    #     "*.hsc" = "haskell";
-    #   };
-
-    #   "telemetry.enableCrashReporter" = false;
-    #   "telemetry.enableTelemetry" = false;
-
-    #   "workbench.editor.highlightModifiedTabs" = true;
-    #   "workbench.iconTheme" = "vs-minimal";
-    #   "workbench.colorTheme" = "Synthwave x Fluoromachine";
-
-    #   "terminal.integrated.shell.linux" = "${pkgs.fish}/bin/fish";
-
-    #   "gitProjectManager.baseProjectsFolders" = [
-    #     "/home/manky/repos"
-    #   ];
-
-    #   "gitProjectManager.storeRepositoriesBetweenSessions" = true;
-
-    #   # "rewrap.wrappingColumn" = 90;
-    #   "rewrap.wholeComment" = false;
-    #   "rewrap.doubleSentenceSpacing" = true;
-
-    #   "cSpell.language" = "en-GB";
-    # };
+  programs.gpg.enable = true;
+  services.gpg-agent = {
+    enable = true;
+    pinentryFlavor = "curses";
+    grabKeyboardAndMouse = true;
   };
+  services.gnome-keyring.enable = true;
+
+  services.keybase.enable = true;
+  services.kbfs.enable = true;
 
   # home.file.".emacs.d/init.el".source = ~/repos/dootfeelz/editor/emacs/init.el;
   # services.emacs.enable = true;
@@ -451,13 +442,10 @@ in
     brightness.day = "1.0";
     brightness.night = "0.7";
     provider = "geoclue2";
-
     # Brisbane lat/long
     # longitude  = "153.0251";
     # latitude = "-27.4698";
   };
-
-  # services.lorri.enable = true;
 
   services.xscreensaver = {
     enable = true;
@@ -500,7 +488,10 @@ in
 
   programs.kitty = {
     enable = true;
-    font.name = "Fira Code 11";
+    font = {
+      name = "Iosevka Regular 11";
+      package = pkgs-unstable.iosevka;
+    };
     settings = {
       enable_audio_bell = false;
       copy_on_select = true;
@@ -528,29 +519,64 @@ in
   };
 
   # Shamelessly stolen from benkoleras config for great copy/paste justice.
-   programs.urxvt = {
-     enable = true;
-     fonts = ["xft:Iosevka=11"];
-     keybindings = {
-       "Shift-Control-C" = "eval:selection_to_clipboard";
-       "Shift-Control-V" = "eval:paste_clipboard";
-     };
-   };
+   # programs.urxvt = {
+   #   enable = true;
+   #   fonts = ["xft:Iosevka=11"];
+   #   keybindings = {
+   #     "Shift-Control-C" = "eval:selection_to_clipboard";
+   #     "Shift-Control-V" = "eval:paste_clipboard";
+   #   };
+   # };
 
   services.pasystray.enable = true;
   services.network-manager-applet.enable = true;
-
+  services.blueman-applet.enable = true;
   systemd.user.startServices = true;
 
-  xsession = {
+  xsession =
+    let
+      i3mod = "Mod4";
+      plyr = cmd: "exec playerctl --player=spotify ${cmd}";
+    in {
     enable = true;
-    windowManager.xmonad = {
+    windowManager.i3 = {
       enable = true;
-      enableContribAndExtras = true;
-      extraPackages = hpkgs: with hpkgs; [
-        xmonad-contrib
-      ];
-      config = ~/repos/dootfeelz/xmonad/xmonad.hs;
+      config = {
+        terminal = "kitty";
+        modifier = i3mod;
+        fonts = ["FontAwesome 6" "DejaVu Sans Mono 10" "Iosevka Regular 10"];
+        startup =
+          [ { command = "/home/manky/.fehbg"; }
+          ];
+        keybindings = lib.mkOptionDefault {
+          # Activate screenlock
+          "${i3mod}+Ctrl+l" = "exec sh -c 'xscreensaver-command -lock'";
+          # Spotify control
+          "XF86AudioPlay" = plyr "play-pause";
+          "XF86AudioNext" = plyr "next";
+          "XF86AudioPrev" = plyr "previous";
+          # Monitor Brightness
+          "${i3mod}+Shift+b" = "exec sh -c 'xbacklight -dec 5'";
+          "${i3mod}+b" = "exec sh -c 'xbacklight -inc 5'";
+          # Volumne
+          "XF86AudioLowerVolume" = "exec sh -c 'amixer sset Master 5%-'";
+          "XF86AudioRaiseVolume" = "exec sh -c 'amixer sset Master 5%+'";
+          "XF86AudioMute" = "exec pactl set-sink-mute @DEFAULT_SINK@ toggle";
+          # Multi-monitor control
+          "${i3mod}+m" = "move workspace to output eDP-1";
+          "${i3mod}+Shift+m" = "move workspace to output HDMI-2";
+          # Focus
+          "${i3mod}+j" = "focus left";
+          "${i3mod}+k" = "focus down";
+          "${i3mod}+l" = "focus up";
+          "${i3mod}+semicolon" = "focus right";
+          # Move
+          "${i3mod}+Shift+j" = "move left";
+          "${i3mod}+Shift+k" = "move down";
+          "${i3mod}+Shift+l" = "move up";
+          "${i3mod}+Shift+semicolon" = "move right";
+        };
+      };
     };
   };
 
