@@ -38,11 +38,11 @@ Plug 'vim-crystal/vim-crystal'
 Plug 'Raku/vim-raku' 
 
 " Te he
-Plug 'alex-ren/org.ats-lang.toolats', { 'rtp': 'org.ats-lang.toolats.vim' }
+" Plug 'alex-ren/org.ats-lang.toolats', { 'rtp': 'org.ats-lang.toolats.vim' }
 
 " OMG
-Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
-" Plug 'Mercury-Language/mercury', { 'rtp': 'vim', 'do': 'make install' }
+" Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
+Plug 'Mercury-Language/mercury', { 'rtp': 'vim', 'do': 'make install' }
 
 call plug#end()
 

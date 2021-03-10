@@ -2,11 +2,10 @@
 let
   from-home = dir: ./repos/dootfeelz/nixos/homemgr + dir;
   pkgs-unstable = import <nixpkgs-unstable> { config = { allowBroken = true; allowUnfree = true; }; };
-  ghcide-nix = import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/master") {};
 
   nivToken = "2578eeea7034fb742727846f1ac3eba02fd9762c";
 
-  postman780 = import ./packages/postman;
+  # postman780 = import ./packages/postman;
 
   isKakFile = name: type: type == "regular" && lib.hasSuffix ".kak" name;
   isDir     = name: type: type == "directory";
@@ -84,6 +83,24 @@ let
         version = "1.1.18";
         sha256 = "0dg68z9h84rpwg82wvk74fw7hyjbsylqkvrd0r94ma9bmqzdvi4x";
       }
+      {
+        publisher = "ronnidc";
+        name = "nunjucks";
+        version = "0.3.0";
+        sha256 = "1xdh3d6azj9al6dcmz0jmivixlz4a3qxcm09x17c0w0f6issmbdf";
+      }
+      {
+        publisher = "haskell";
+        name = "haskell";
+        version = "1.2.0";
+        sha256 = "0vxsn4s27n1aqp5pp4cipv804c9cwd7d9677chxl0v18j8bf7zly";
+      }
+      {
+        publisher = "ms-vscode";
+        name = "cmake-tools";
+        version = "1.6.0";
+        sha256 = "1j3b6wzlb5r9q2v023qq965y0avz6dphcn0f5vwm9ns9ilcgm3dw";
+      }
     ];
   } );
 
@@ -118,14 +135,14 @@ in
         sublime4 = super.callPackage ./packages/sublime4 {};
       })
 
-      (_: super: {
-        zoom-us = super.libsForQt5.callPackage ./packages/zoom-us {};
-      })
+      # (_: super: {
+      #   zoom-us = super.libsForQt5.callPackage ./packages/zoom-us {};
+      # })
 
       # KDB+ !
-      (_: super: {
-        kdbplus = super.callPackage_i686 ./packages/kdbplus {};
-      })
+      # (_: super: {
+      #   kdbplus = super.callPackage_i686 ./packages/kdbplus {};
+      # })
 
       # Fix up the weird renaming of the factor binary
       (_: super: {
@@ -135,7 +152,7 @@ in
       })
 
       # Sbtix (scala build helper for nixpkgs)
-      (import ./overlays/sbtix)
+      # (import ./overlays/sbtix)
     ];
 
   # Let Home Manager install and manage itself.
@@ -149,7 +166,6 @@ in
 
   # Misc apps etc
   home.packages = with pkgs; [
-    sbtix
     # system
     file
     cacert
@@ -161,7 +177,7 @@ in
     xorg.xbacklight
     networkmanagerapplet
     ed
-    stevenblack-hosts
+    # stevenblack-hosts
     cachix
     dnsmasq
     fmt
@@ -172,14 +188,13 @@ in
     aspellDicts.en
 
     git-crypt
+    gitAndTools.gitui
 
     # gamez
     pkgs-unstable.steam
 
     # editor shenanigans
-    pkgs-unstable.sublime-merge
     sublime4
-    kakoune
     pkgs-unstable.vscode
     wrappedVSCode
     pkgs-unstable.ormolu
@@ -190,7 +205,11 @@ in
     # pkgs-unstable.racket
     factor-lang
     gforth
-    kdbplus
+    # kdbplus
+    # Pharo !!
+    pharo-launcher
+
+    pkgs-unstable.ccls
 
     # turtle power
     shellcheck
@@ -200,10 +219,10 @@ in
     tree
     html2text
     pkgs-unstable.silver-searcher
-    pkgs-unstable.lorri
     pkgs-unstable.universal-ctags
     pkgs-unstable.entr
     pkgs-unstable.cool-retro-term
+    pkgs-unstable.ripgrep
 
     # apps
     evince
@@ -213,17 +232,16 @@ in
     simplescreenrecorder
     pkgs-unstable.keybase-gui
     pkgs-unstable.zeal
-    krita
+    # krita
     libreoffice
-    pkgs-unstable.postman
-    pkgs-unstable.signal-desktop
+    # pkgs-unstable.postman
 
     # Sigh...
     pkgs-unstable.ledger-live-desktop
     pkgs-unstable.ledger-udev-rules
 
     # fonts
-    iosevka
+    # iosevka
     mononoki
     roboto-mono
     font-awesome-ttf
@@ -238,8 +256,7 @@ in
     epiphany
     pkgs-unstable.discord
     pkgs-unstable.brave
-    slack
-    zoom-us
+    # slack
   ];
 
   programs.feh.enable = true;
@@ -248,15 +265,23 @@ in
 
   programs.taskwarrior.enable = true;
 
+  programs.qutebrowser = {
+    enable = true;
+    searchEngines = {
+      w = "https://en.wikipedia.org/wiki/Special:Search?search={}&go=Go&ns0=1";
+      archw = "https://wiki.archlinux.org/?search={}";
+      nw = "https://nixos.wiki/index.php?search={}";
+      goog = "https://www.google.com/search?hl=en&q={}";
+      hack = "https://hackage.haskell.org/package/{}";
+    };
+  };
+
   programs.fish = {
     enable = true;
       shellAliases = {
       # ghci = "ghci -interactive-print=Text.Pretty.Simple.pPrint -package pretty-simple";
       ns = "nix-shell $argv --command fish";
       gs = "git status";
-      ob-standup = "zoom-us \"zoommtg://zoom-us/join?confno=9355149074\"";
-      nivv = "GITHUB_TOKEN=${nivToken} niv";
-      sb = "nix-shell -p openssl --command subl";
       sstop = "systemctl --user stop xscreensaver.service";
       sstart = "systemctl --user restart xscreensaver.service";
     };
@@ -284,7 +309,7 @@ in
   programs.chromium.enable = true;
   programs.fzf.enable = true;
 
-   home.file.".config/kak/colors" = {
+  home.file.".config/kak/colors" = {
     source = pkgs.kakoune-selenized + /colors;
     recursive = true;
   };
@@ -414,7 +439,10 @@ in
     pinentryFlavor = "curses";
     grabKeyboardAndMouse = true;
   };
-  services.gnome-keyring.enable = true;
+  services.gnome-keyring = {
+    enable = true;
+    components = [ "pkcs11" "secrets" "ssh" ];
+  };
 
   services.keybase.enable = true;
   services.kbfs.enable = true;
@@ -431,6 +459,11 @@ in
     HOSTALIASES = "${pkgs.stevenblack-hosts}/hosts";
   };
 
+  services.udiskie.enable = true;
+
+  programs.autorandr.enable = true;
+
+  services.lorri.enable = true;
   programs.direnv = {
     enable = true;
     enableFishIntegration = true;

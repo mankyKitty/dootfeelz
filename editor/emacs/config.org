@@ -6,6 +6,7 @@
 * Sanity settings
   Disable tabs, we're not monsters
   #+BEGIN_SRC emacs-lisp
+;; (setq debug-on-error t)
     (setq-default indent-tabs-mode nil)
     (setq-default electric-indent-inhibit t)
   #+END_SRC
@@ -166,10 +167,10 @@
     (tooltip-mode    -1)
     (menu-bar-mode   -1)
     (setq-default inhibit-startup-screen t)
-    ;; (setq default-frame-alist '((font . "-ADBO-Source Code Pro-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")))
+    (setq default-frame-alist '((font . "-ADBO-Source Code Pro-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")))
     ;; (setq default-frame-alist '((font . "-POOP-Fixedsys Excelsior 3.01-normal-normal-normal-*-16-*-*-*-*-0-iso10646-1")))
     ;; (setq default-frame-alist '((font . "-V.R.-PxPlus IBM VGA9-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")))
-    (setq default-frame-alist '((font . "-CYEL-Iosevka-normal-normal-normal-*-14-*-*-*-d-0-iso10646-1")))
+    ;; (setq default-frame-alist '((font . "-CYEL-Iosevka-normal-normal-normal-*-14-*-*-*-d-0-iso10646-1")))
     ;; (setq default-frame-alist '((font . "-UKWN-mononoki-normal-normal-normal-*-13-*-*-*-*-0-iso10646-1")))
     ;; (setq default-frame-alist '((font . "-CTDB-Fira Code-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")))
   #+END_SRC
@@ -277,7 +278,7 @@
          ("M-g l" . consult-line)          ;; "M-s l" is a good alternative.
          ("M-g m" . consult-mark)          ;; I recommend to bind Consult navigation
          ("M-g k" . consult-global-mark)   ;; commands under the "M-g" prefix.
-         ("M-g r" . consult-git-grep)      ;; or consult-grep, consult-ripgrep
+         ("M-g r" . consult-ripgrep)       ;; or consult-grep, consult-ripgrep, or consult-git-grep
          ("M-g f" . consult-find)          ;; or consult-locate, my-fdfind
          ("M-g i" . consult-project-imenu) ;; or consult-imenu
          ("M-g e" . consult-error)
@@ -293,7 +294,7 @@
   ;; locally in a let-binding.
   (defun my-fdfind (&optional dir)
     (interactive "P")
-    (let ((consult-find-command '("fdfind" "--color=never" "--full-path")))
+    (let ((consult-find-command "fdfind --color=never --full-path"))
       (consult-find dir)))
 
   ;; Replace `multi-occur' with `consult-multi-occur', which is a drop-in replacement.
@@ -512,78 +513,114 @@
        :after nix-mode
        )
    #+END_SRC
-* Language Modes!! OMG
-** OCaml
+** Universal CTags
    #+begin_src emacs-lisp
-     (use-package tuareg
+(use-package counsel-etags
+  :ensure t
+  :after (counsel)
+  :bind (("C-]" . counsel-etags-find-tag-at-point))
+  :init
+  (add-hook 'prog-mode-hook
+        (lambda ()
+          (add-hook 'after-save-hook
+            'counsel-etags-virtual-update-tags 'append 'local)))
+  :config
+  (setq counsel-etags-update-interval 60)
+  (push "build" counsel-etags-ignore-directories))
+   #+end_src
+* Language Modes!! OMG
+** CPP
+   #+begin_src emacs-lisp
+     (use-package clang-format
        :ensure t
-       :load-path "~/.nix-profile/share/emacs/site-lisp"
-     )
-     (use-package merlin
-       :ensure t
-       :init
-       (add-to-list 'load-path "~/.nix-profile/share/emacs/site-lisp")
-       (setq merlin-command "ocamlmerlin")
        :config
-       (add-hook 'tuareg-mode-hook 'merlin-mode t)
+       (evil-leader/set-key "b F" 'clang-format-region)
      )
-     (use-package ocp-indent :ensure t)
-     #+end_src
-** Elixir
-   #+BEGIN_SRC emacs-lisp
 
-     (use-package mix :ensure t)
-     (use-package elixir-mode
+     (use-package ccls
+       :after (lsp-mode)
        :ensure t
-       :init
-       ;; (add-hook 'elixir-mode-hook 'mix-minor-mode)
-       )
+       :hook ((c-mode c++-mode objc-mode cuda-mode) . (lambda () (require 'ccls) (lsp)))
+       :config
+       (setq ccls-executable "ccls")
+     )
+   #+end_src
+** CMake
+   #+begin_src emacs-lisp
+(use-package cmake-mode :ensure t)
+   #+end_src
 
-   #+END_SRC
+** OCaml
+ #+begin_src emacs-lisp
+   (use-package tuareg
+     :ensure t
+     :load-path "~/.nix-profile/share/emacs/site-lisp"
+   )
+   (use-package merlin
+     :ensure t
+     :init
+     (add-to-list 'load-path "~/.nix-profile/share/emacs/site-lisp")
+     (setq merlin-command "ocamlmerlin")
+     :config
+     (add-hook 'tuareg-mode-hook 'merlin-mode t)
+   )
+   (use-package ocp-indent :ensure t)
+   #+end_src
+** Elixir
+ #+BEGIN_SRC emacs-lisp
+
+   (use-package mix :ensure t)
+   (use-package elixir-mode
+     :ensure t
+     :init
+     ;; (add-hook 'elixir-mode-hook 'mix-minor-mode)
+     )
+
+ #+END_SRC
 
 ** Rakudo!!
 #+BEGIN_SRC emacs-lisp
-  (use-package raku-mode
-    :ensure t
-    :defer t
-  )
+(use-package raku-mode
+  :ensure t
+  :defer t
+)
 #+END_SRC
 ** Crystal
 #+BEGIN_SRC emacs-lisp
 (use-package crystal-mode
-  :ensure t
+:ensure t
 )
 #+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp
 (use-package haskell-mode
-  :ensure t
-  :after flycheck
-  :config
-  ;; Configure haskell-mode to use cabal new-style builds
-  (setq haskell-process-type 'cabal-new-repl)
-  ;; Tell company-mode to ask lsp for completions
-  (setq haskell-completion-backend 'lsp)
-  ;; Make sure we try to use the current nix env if we have one
-  (setq haskell-process-wrapper-function
-    (lambda (args) (apply 'nix-shell-command (nix-current-sandbox) args)))
+:ensure t
+:after flycheck
+:config
+;; Configure haskell-mode to use cabal new-style builds
+(setq haskell-process-type 'cabal-new-repl)
+;; Tell company-mode to ask lsp for completions
+(setq haskell-completion-backend 'lsp)
+;; Make sure we try to use the current nix env if we have one
+(setq haskell-process-wrapper-function
+  (lambda (args) (apply 'nix-shell-command (nix-current-sandbox) args)))
 
-  (setq haskell-hoogle-url "http://localhost:8080/?hoogle=%s")
-  (evil-leader/set-key
-    "h h" 'haskell-hoogle
-    )
+(setq haskell-hoogle-url "http://localhost:8080/?hoogle=%s")
+(evil-leader/set-key
+  "h h" 'haskell-hoogle
+  )
 
-  ;; Disable the haskell-stack-ghc checker
-  (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
-  (add-hook 'hack-local-variables-hook #'manky/set-dante-locals nil 'local)
+;; Disable the haskell-stack-ghc checker
+(add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
+(add-hook 'hack-local-variables-hook #'manky/set-dante-locals nil 'local)
 
-  (add-hook 'haskell-mode-hook 'prettify-symbols-mode)
-  (add-hook 'haskell-mode-hook
-    (lambda ()
-      (setq tab-width 2)
-            (set (make-local-variable 'company-backends)
-                 (append '((company-capf company-dabbrev-code))
-                         company-backends))))
+(add-hook 'haskell-mode-hook 'prettify-symbols-mode)
+(add-hook 'haskell-mode-hook
+  (lambda ()
+    (setq tab-width 2)
+          (set (make-local-variable 'company-backends)
+               (append '((company-capf company-dabbrev-code))
+                       company-backends))))
 
 )
 #+END_SRC
@@ -927,20 +964,23 @@ Clean up the mode line a bit as it gets a bit busy by default.
 #+END_SRC
 * Yasnippet
 #+BEGIN_SRC emacs-lisp
-(use-package yasnippet
-  :ensure t
-  :hook (prog-mode-hook . yas-minor-mode)
-  :diminish yas-minor-mode
-  :config
-  (with-eval-after-load 'yasnippet (setq yas-snippet-dirs '(yasnippet-snippets-dir)))
-  (define-key yas-minor-mode-map (kbd "C-'") #'yas-expand)
-  (yas-reload-all)
-)
+  (use-package yasnippet
+    :ensure t
+    :hook (prog-mode-hook . yas-minor-mode)
+    :diminish yas-minor-mode
+    :config
+    (with-eval-after-load 'yasnippet (setq yas-snippet-dirs '(yasnippet-snippets-dir)))
+    (define-key yas-minor-mode-map (kbd "C-'") #'yas-expand)
+    (yas-reload-all)
+    (yas-global-mode)
+  )
 
-(use-package yasnippet-snippets
-  :ensure t
-  :after ( yasnippet )
-)
+  (use-package yasnippet-snippets
+    :ensure t
+    :after ( yasnippet )
+  )
+
+  (use-package haskell-snippets :ensure t)
 #+END_SRC
 * Writeroom
 #+BEGIN_SRC emacs-lisp
@@ -958,22 +998,49 @@ Clean up the mode line a bit as it gets a bit busy by default.
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :ensure t
-  :hook (haskell-mode . lsp)
-  :init
-  (setq lsp-prefer-flymake nil)
-  :config
-  (setq lsp-prefer-flymake nil)
+  :hook (
+  (haskell-mode . lsp)
+  ;; (cc-mode . lsp)
+  (lsp-mode . lsp-enable-which-key-integration)
+  )
+  ;; Doesn't work :bind (:map lsp-mode-map ("SPC-h" . lsp-command-map))
+  ;; :init
+  ;; (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+  ;; :config
   )
   #+END_SRC emacs-lisp
 
 ** ~lsp-ui~
 #+BEGIN_SRC emacs-lisp
- (use-package lsp-ui
-   :after (lsp-mode)
-   :ensure t
-   :config
-   (setq lsp-prefer-flymake nil))
-   #+END_SRC emacs-lisp
+(use-package lsp-ui-imenu :ensure t)
+(use-package lsp-ui
+  :ensure t
+  :after (lsp-mode)
+  :commands lsp-ui-mode
+  ;; :bind (:map lsp-ui-mode-map
+  ;;        ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+  ;;        ([remap xref-find-references] . lsp-ui-peek-find-references)
+  ;;        ("<leader> u" . lsp-ui-imenu))
+  :config
+  ;; (setq lsp-ui-sideline-ignore-duplicate t)
+  (setq lsp-ui-doc-enable t
+   lsp-ui-doc-use-webkit nil
+   lsp-ui-doc-header nil
+   lsp-ui-doc-delay 0.2
+   lsp-ui-doc-include-signature t
+   lsp-ui-doc-alignment 'at-point
+   lsp-ui-doc-use-childframe nil
+   lsp-ui-doc-border (face-foreground 'default)
+   lsp-ui-peek-enable t
+   lsp-ui-peek-show-directory t
+   lsp-ui-sideline-update-mode 'line
+   lsp-ui-sideline-enable t
+   lsp-ui-sideline-show-code-actions t
+   lsp-ui-sideline-show-hover nil
+   lsp-ui-sideline-ignore-duplicate t)
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+  )
+#+END_SRC emacs-lisp
 
 ** ~company-lsp~
  #+begin_src emacs-lisp
@@ -993,27 +1060,39 @@ Clean up the mode line a bit as it gets a bit busy by default.
    #+end_src
 ** LSP Language Plugins
 *** Haskell
-     #+begin_src emacs-lisp
-       (use-package lsp-haskell
-         :ensure t
-         :after (lsp-mode haskell-mode)
-         :config
-         (setq default-nix-wrapper (lambda (args)
-           (append
-             (append (list "nix-shell" "-I" "." "--command" ) (list (mapconcat 'identity args " ")))
-             (list (nix-current-sandbox)))))
+#+begin_src emacs-lisp
+    (use-package lsp-haskell
+      :ensure t
+      :after (lsp-mode haskell-mode)
+      :config
+      (setq default-nix-wrapper (lambda (args)
+                                  (append
+                                   (append (list "nix-shell" "-I" "." "--command" ) (list (mapconcat 'identity args " ")))
+                                   (list (nix-current-sandbox)))))
 
-         (setq lsp-haskell-process-wrapper-function default-nix-wrapper)
-         (setq lsp-haskell-process-path-hie "ghcide")
-         (setq lsp-haskell-process-args-hie '())
-         ;; (setq default-nix-wrapper (lambda (args)
-         ;;   (append
-         ;;     (append (list "nix-shell" "-I" "." "--command" ) (list (mapconcat 'identity args " ")))
-         ;;     (list (nix-current-sandbox)))))
-
-         ;; (add-hook 'haskell-mode 'flycheck-mode)
-       )
-     #+end_src
+      (setq lsp-haskell-server-wrapper-function default-nix-wrapper)
+      ;; (setq default-nix-wrapper (lambda (args)
+      ;;   (append
+      ;;     (append (list "nix-shell" "-I" "." "--command" ) (list (mapconcat 'identity args " ")))
+      ;;     (list (nix-current-sandbox)))))
+      (with-eval-after-load 'lsp-mode
+        (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
+      (add-hook 'haskell-mode-hook #'lsp)
+      (add-hook 'haskell-literate-mode-hook #'lsp)
+      (dolist (dir '(
+                     "[/\\\\]static.*"
+                     "[/\\\\]config"
+                     "[/\\\\]db"
+                     "[/\\\\]server"
+                     "[/\\\\]email"
+                     "[/\\\\]_dev"
+                     "[/\\\\]patches"
+                     "[/\\\\]dep"
+                     ))
+         (push dir lsp-file-watch-ignored-directories))
+      ;; (add-hook 'haskell-mode 'flycheck-mode)
+      )
+#+end_src
 ** Set some LSP keybindings
    #+begin_src emacs-lisp
    (evil-leader/set-key

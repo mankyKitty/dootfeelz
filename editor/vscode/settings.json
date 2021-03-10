@@ -45,7 +45,6 @@
         100
     ],
     "editor.wordWrapColumn": 100,
-    "editor.wordWrap": "wordWrapColumn",
     "editor.wrappingIndent": "same",
     "cSpell.enabled": true,
     "cSpell.language": "en-GB",
@@ -58,5 +57,18 @@
         "<C-d>": true
     },
     "crystal-lang.completion": true,
-    "C_Cpp.default.compilerArgs": ["-Wall"],
-    "C_Cpp.default.cppStandard": "c++14"
+    "C_Cpp.default.compilerArgs": [
+        "-Wall"
+    ],
+    "C_Cpp.default.cppStandard": "c++14",
+    "workbench.iconTheme": "Monokai Pro Monochrome Icons",
+    "[javascript]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "C_Cpp.default.includePath": [
+        "${LD_LIBRARY_PATH}"
+    ],
+    "[cpp]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    }
+}

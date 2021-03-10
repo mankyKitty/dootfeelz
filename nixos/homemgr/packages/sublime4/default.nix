@@ -15,7 +15,7 @@ let
   versionUrl = "https://download.sublimetext.com/latest/${if dev then "dev" else "stable"}";
   versionFile = builtins.toString ./packages.nix;
   arch = "x64";
-  buildVersion = "4094";
+  buildVersion = "4098";
 
   libPath = stdenv.lib.makeLibraryPath [ xorg.libX11 glib gtk3 cairo pango ];
   redirects = [ "/usr/bin/pkexec=${pkexecPath}" ];
@@ -34,8 +34,10 @@ in let
     version = buildVersion;
 
     src = fetchurl {
-      url = "https://download.sublimetext.com/sublime_text_build_4094_x64.tar.xz";
-      sha256 = "0i566aqk11hwgm31c0pycr68rp0hhyspc1rynhs6b8gc1j1ql9r6";
+      url = "https://download.sublimetext.com/sublime_text_build_${buildVersion}_${arch}.tar.xz";
+      sha256 = "0mj54v53wyxxlynrk4qqnmpy87g06f9w5vqfsghzbg99p3wxyr4j";
+      # sha256 = "15ja2y4aj2m4ysxdg2m85mwp5ilpcq73pvm7g2p4dyrfbjzxc6jq";
+      # sha256 = "0i566aqk11hwgm31c0pycr68rp0hhyspc1rynhs6b8gc1j1ql9r6";
     };
 
     dontStrip = true;
