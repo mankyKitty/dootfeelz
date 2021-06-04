@@ -1,6 +1,6 @@
 {
     "editor.tabSize": 2,
-    "editor.fontFamily": "'Fantasque Sans Mono', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
+    "editor.fontFamily": "'Iosevka Semibold', 'Hasklig', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
     "editor.fontLigatures": true,
     "files.trimTrailingWhitespace": true,
     "files.associations": {
@@ -70,5 +70,6 @@
     ],
     "[cpp]": {
         "editor.defaultFormatter": "xaver.clang-format"
-    }
+    },
+    "editor.fontSize": 13
 }

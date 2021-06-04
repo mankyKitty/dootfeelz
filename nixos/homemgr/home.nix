@@ -5,105 +5,16 @@ let
 
   nivToken = "2578eeea7034fb742727846f1ac3eba02fd9762c";
 
-  # postman780 = import ./packages/postman;
-
-  isKakFile = name: type: type == "regular" && lib.hasSuffix ".kak" name;
-  isDir     = name: type: type == "directory";
-  allKakFiles = (dir:
-    let fullPath = p: "${dir}/${p}";
-        files = builtins.readDir dir;
-        subdirs  = lib.concatMap (p: allKakFiles (fullPath p)) (lib.attrNames (lib.filterAttrs isDir files));
-        subfiles = builtins.map fullPath (lib.attrNames (lib.filterAttrs isKakFile files));
-    # This makes sure the most shallow files are loaded first
-    in (subfiles ++ subdirs)
-  );
-  kakImport = name: ''source "${name}"'';
-  allKakImports = dir: builtins.concatStringsSep "\n" (map kakImport (allKakFiles dir));
-
   vsCodeWithSomeExtensions = pkgs-unstable.vscode-with-extensions.override (_: {
-    vscodeExtensions = with pkgs-unstable.vscode-extensions; [
-      bbenoist.Nix
-      ms-vscode.Go
+    vscodeExtensions =  with pkgs-unstable.vscode-extensions; [
+      # These require external tools and need more nixos specific massaging
       ms-vscode.cpptools
-      justusadam.language-haskell
-      skyapps.fish-vscode
-      vscodevim.vim
-    ] ++ pkgs-unstable.vscode-utils.extensionsFromVscodeMarketplace [
-      {
-        name = "project-manager";
-        publisher = "alefragnani";
-        version = "12.0.1";
-        sha256 = "1bckjq1dw2mwr1zxx3dxs4b2arvnxcr32af2gxlkh4s26hvp9n1v";
-      }
-      {
-        name = "nix-env-selector";
-        publisher = "arrterian";
-        version = "0.1.2";
-        sha256 = "1n5ilw1k29km9b0yzfd32m8gvwa2xhh6156d4dys6l8sbfpp2cv9";
-      }
-      {
-        name = "bracket-pair-colorizer";
-        publisher = "coenraads";
-        version = "1.0.61";
-        sha256 = "0r3bfp8kvhf9zpbiil7acx7zain26grk133f0r0syxqgml12i652";
-      }
-      {
-        publisher = "faustinoaq";
-        name = "crystal-lang";
-        version = "0.4.0";
-        sha256 = "04dnyap8hl2a25kh5r5jv9bgn4535pxdaa77r1cj9hmsadqd4sgr";
-      }
-      {
-        publisher = "freebroccolo";
-        name = "reasonml";
-        version = "1.0.38";
-        sha256 = "1nay6qs9vcxd85ra4bv93gg3aqg3r2wmcnqmcsy9n8pg1ds1vngd";
-      }
-      {
-        publisher = "gleam";
-        name = "gleam";
-        version = "1.0.0";
-        sha256 = "0r8k7y1247dmd0jc1d5pg31cfxi7q849x5psajw8h2s4834c4dk9";
-      }
-      {
-        publisher = "kahole";
-        name = "magit";
-        version = "0.6.2";
-        sha256 = "0qr11k4n96wnsc2rn77i01dmn0zbaqj32wp9cblghhr6h5vs2y9h";
-      }
-      {
-        publisher = "xaver";
-        name = "clang-format";
-        version = "1.9.0";
-        sha256 = "0bwc4lpcjq1x73kwd6kxr674v3rb0d2cjj65g3r69y7gfs8yzl5b";
-      }
-      {
-        publisher = "monokai";
-        name = "theme-monokai-pro-vscode";
-        version = "1.1.18";
-        sha256 = "0dg68z9h84rpwg82wvk74fw7hyjbsylqkvrd0r94ma9bmqzdvi4x";
-      }
-      {
-        publisher = "ronnidc";
-        name = "nunjucks";
-        version = "0.3.0";
-        sha256 = "1xdh3d6azj9al6dcmz0jmivixlz4a3qxcm09x17c0w0f6issmbdf";
-      }
-      {
-        publisher = "haskell";
-        name = "haskell";
-        version = "1.2.0";
-        sha256 = "0vxsn4s27n1aqp5pp4cipv804c9cwd7d9677chxl0v18j8bf7zly";
-      }
-      {
-        publisher = "ms-vscode";
-        name = "cmake-tools";
-        version = "1.6.0";
-        sha256 = "1j3b6wzlb5r9q2v023qq965y0avz6dphcn0f5vwm9ns9ilcgm3dw";
-      }
-    ];
+    ] ++ pkgs-unstable.vscode-utils.extensionsFromVscodeMarketplace
+      # This lets me pull in updates when required using my update ext script
+      (import ./../../editor/vscode/extensions.nix).extensions;
   } );
 
+  # My wrapped version of vscode that keeps my data folder in a writable location.
   wrappedVSCode = pkgs.writeScriptBin "wcode" ''
     #!${pkgs.stdenv.shell}
     exec ${vsCodeWithSomeExtensions}/bin/code \
@@ -119,10 +30,15 @@ in
 
   nixpkgs.overlays =
     [ (import ./overlays/stevenblack-hosts.nix)
-      (import ./overlays/kak-fzf)
-      (import ./overlays/kakoune)
-      (import ./overlays/kakoune-selenized)
-      (import ./overlays/ormolu)
+      # (import ./overlays/kak-fzf)
+      # (import ./overlays/kakoune)
+      # (import ./overlays/kakoune-selenized)
+      # (import ./overlays/ormolu)
+
+      # Nix community overlay for gccEmacs
+      (import (builtins.fetchTarball {
+        url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+      }))
 
       # Fixing NSS & Slack behaviour
       (_: super:  {
@@ -134,25 +50,6 @@ in
       (_: super: {
         sublime4 = super.callPackage ./packages/sublime4 {};
       })
-
-      # (_: super: {
-      #   zoom-us = super.libsForQt5.callPackage ./packages/zoom-us {};
-      # })
-
-      # KDB+ !
-      # (_: super: {
-      #   kdbplus = super.callPackage_i686 ./packages/kdbplus {};
-      # })
-
-      # Fix up the weird renaming of the factor binary
-      (_: super: {
-        factor-lang = super.callPackage ./packages/factor-lang {
-          gtkglext = super.gnome2.gtkglext;
-        };
-      })
-
-      # Sbtix (scala build helper for nixpkgs)
-      # (import ./overlays/sbtix)
     ];
 
   # Let Home Manager install and manage itself.
@@ -160,12 +57,23 @@ in
 
   imports = [
     ./development.nix
-    # ./polybar.nix
     ./dunst.nix
   ];
 
+  home.stateVersion = "21.05";
+  home.username = "manky";
+  home.homeDirectory = /home/manky;
+
   # Misc apps etc
   home.packages = with pkgs; [
+    # Nix-thunk for great thunkening
+    # (import (builtins.fetchTarball "https://github.com/obsidiansystems/nix-thunk/archive/master.tar.gz") {}).command
+
+    (pkgs.writeScriptBin "nixFlakes" ''
+      #!/usr/bin/env bash
+      exec ${pkgs.nixUnstable}/bin/nix --experimental-features "nix-command flakes" "$@"
+    '')
+
     # system
     file
     cacert
@@ -176,13 +84,13 @@ in
     powertop
     xorg.xbacklight
     networkmanagerapplet
-    ed
-    # stevenblack-hosts
+
     cachix
     dnsmasq
     fmt
     pkgs-unstable.openssl.dev
     ncdu
+    lorri
 
     aspell
     aspellDicts.en
@@ -195,20 +103,11 @@ in
 
     # editor shenanigans
     sublime4
-    pkgs-unstable.vscode
     wrappedVSCode
-    pkgs-unstable.ormolu
 
-    # languages
-    # pkgs-unstable.mercury
-    pkgs-unstable.exercism
-    # pkgs-unstable.racket
-    factor-lang
-    gforth
-    # kdbplus
-    # Pharo !!
-    pharo-launcher
-
+    # For neovim CoC
+    pkgs-unstable.nodejs
+    # Clang LSP client
     pkgs-unstable.ccls
 
     # turtle power
@@ -220,21 +119,16 @@ in
     html2text
     pkgs-unstable.silver-searcher
     pkgs-unstable.universal-ctags
-    pkgs-unstable.entr
-    pkgs-unstable.cool-retro-term
     pkgs-unstable.ripgrep
 
     # apps
     evince
     pandoc
     shutter
-    thunderbird
     simplescreenrecorder
     pkgs-unstable.keybase-gui
-    pkgs-unstable.zeal
-    # krita
+    pkgs-unstable.blender
     libreoffice
-    # pkgs-unstable.postman
 
     # Sigh...
     pkgs-unstable.ledger-live-desktop
@@ -263,8 +157,6 @@ in
   programs.jq.enable = true;
   programs.htop.enable = true;
 
-  programs.taskwarrior.enable = true;
-
   programs.qutebrowser = {
     enable = true;
     searchEngines = {
@@ -288,7 +180,12 @@ in
   };
 
   home.file.".ghci".source = ~/repos/dootfeelz/nixos/homemgr/.ghci_config;
-  home.file.".config/nvim/init.vim".source = ~/repos/dootfeelz/editor/neovim/init.vim;
+
+  home.file."init.vim" = {
+    source = ~/repos/dootfeelz/editor/neovim/init.vim;
+    target = ".config/nvim";
+  };
+
   home.file.".fehbg" = {
     executable = true;
     onChange = "/home/manky/.fehbg";
@@ -309,129 +206,40 @@ in
   programs.chromium.enable = true;
   programs.fzf.enable = true;
 
-  home.file.".config/kak/colors" = {
-    source = pkgs.kakoune-selenized + /colors;
-    recursive = true;
-  };
+  # home.file.".config/kak/colors" = {
+  #   source = pkgs.kakoune-selenized + /colors;
+  #   recursive = true;
+  # };
 
-  programs.kakoune = {
-    enable = true;
-    config = {
-      colorScheme = "kaleidoscope-light";
-      numberLines.enable = true;
-      showWhitespace.enable = true;
-      tabStop = 2;
-      indentWidth = 2;
-      ui = {
-        enableMouse = true;
-        assistant = "cat";
-      };
-      keyMappings = [
-        { mode = "normal"; key = "'<c-p>'"; effect = ":fzf-mode<ret>"; }
-        { mode = "normal"; key = "'<c-l>'"; effect = ":enter-user-mode lsp<ret>"; }
-        { mode = "normal"; key = "'#'"; effect = ":comment-line<ret>"; }
-        { mode = "user"; key = "'p'"; effect = "!xsel --output --clipboard<ret>"; docstring = "paste (after) from clipboard"; }
-        { mode = "user"; key = "'P'"; effect = "<a-!>xsel --output --clipboard<ret>"; docstring = "paste (before) from clipboard"; }
-        { mode = "user"; key = "'y'"; effect = "<a-|>xsel --input --clipboard<ret>:echo copied selection to x11 clipboard<ret>"; docstring = "Yank to clipboard"; }
+  # programs.kakoune = {
+  #   enable = true;
+  #   config = {
+  #     colorScheme = "kaleidoscope-light";
+  #     numberLines.enable = true;
+  #     showWhitespace.enable = true;
+  #     tabStop = 2;
+  #     indentWidth = 2;
+  #     ui = {
+  #       enableMouse = true;
+  #       assistant = "cat";
+  #     };
+  #     keyMappings = [
+  #       { mode = "normal"; key = "'<c-p>'"; effect = ":fzf-mode<ret>"; }
+  #       { mode = "normal"; key = "'<c-l>'"; effect = ":enter-user-mode lsp<ret>"; }
+  #       { mode = "normal"; key = "'#'"; effect = ":comment-line<ret>"; }
+  #       { mode = "user"; key = "'p'"; effect = "!xsel --output --clipboard<ret>"; docstring = "paste (after) from clipboard"; }
+  #       { mode = "user"; key = "'P'"; effect = "<a-!>xsel --output --clipboard<ret>"; docstring = "paste (before) from clipboard"; }
+  #       { mode = "user"; key = "'y'"; effect = "<a-|>xsel --input --clipboard<ret>:echo copied selection to x11 clipboard<ret>"; docstring = "Yank to clipboard"; }
 
-        { mode = "user"; key = "'l'"; effect = ": lint-next-error<ret>"; docstring = "Go to next linting error"; }
-        { mode = "user"; key = "'L'"; effect = ": lint-previous-error<ret>"; docstring = "Go to previous linting error"; }
-        { mode = "user"; key = "'<a-l>'"; effect = ": lint-disable<ret>"; docstring = "Disable linting"; }
-      ];
-    };
-    extraConfig = ''
-
-      ${allKakImports pkgs.kak-fzf}
-
-      # eval %sh{kak-lsp --kakoune -s $kak_session}
-      # hook global WinSetOption filetype=(haskell) %{
-      #   lsp-enable-window
-      # }
-
-      # Custom mercury mode, lets roll
-      source /home/manky/repos/adventofcode/mercury.kak
-
-      hook global InsertChar k %{ try %{
-        exec -draft hH <a-k>jk<ret> d
-        exec <esc>
-      }}
-
-      map global normal = '|${pkgs-unstable.fmt}/bin/fmt -w $kak_opt_autowrap_column<ret>'
-
-      hook global BufCreate .*[.](hsc) %{
-          set-option buffer filetype haskell
-      }
-
-      hook global WinSetOption filetype=haskell %{
-        # HLinty goodness
-        set-option window lintcmd 'hlint'
-        lint-enable
-
-        # Hasktaggy goodness
-        set-option window ctagscmd "hasktags -x -c -R"
-
-        hook window BufWritePost %val{buffile} %{
-          lint
-        }
-      }
-
-      hook global KakBegin .* %{
-          evaluate-commands %sh{
-              path="$PWD"
-              while [ "$path" != "$HOME" ] && [ "$path" != "/" ]; do
-                  if [ -e "./tags" ]; then
-                      printf "%s\n" "set-option -add current ctagsfiles %{$path/tags}"
-                      break
-                  else
-                      cd ..
-                      path="$PWD"
-                  fi
-              done
-          }
-      }
-
-      define-command mkdir %{ nop %sh{ mkdir -p $(dirname $kak_buffile) } }
-      set-option global grepcmd 'ag --column'
-      add-highlighter global/ show-matching
-
-      def suspend-and-resume \
-          -params 1..2 \
-          -docstring 'suspend-and-resume <cli command> [<kak command after resume>]: backgrounds current kakoune client and runs specified cli command.  Upon exit of command the optional kak command is executed.' \
-          %{ evaluate-commands %sh{
-
-          # Note we are adding '&& fg' which resumes the kakoune client process after the cli command exits
-          cli_cmd="$1 && fg"
-          post_resume_cmd="$2"
-
-          # automation is different platform to platform
-          platform=$(uname -s)
-          case $platform in
-              Darwin)
-                  automate_cmd="sleep 0.01; osascript -e 'tell application \"System Events\" to keystroke \"$cli_cmd\\n\" '"
-                  kill_cmd="/bin/kill"
-                  break
-                  ;;
-              Linux)
-                  automate_cmd="sleep 0.2; xdotool type '$cli_cmd'; xdotool key Return"
-                  kill_cmd="/usr/bin/kill"
-                  break
-                  ;;
-          esac
-
-          # Uses platforms automation to schedule the typing of our cli command
-          nohup sh -c "$automate_cmd"  > /dev/null 2>&1 &
-          # Send kakoune client to the background
-          $kill_cmd -SIGTSTP $kak_client_pid
-
-          # ...At this point the kakoune client is paused until the " && fg " gets run in the $automate_cmd
-
-          # Upon resume, run the kak command is specified
-          if [ ! -z "$post_resume_cmd" ]; then
-              echo "$post_resume_cmd"
-          fi
-      }}
-    '';
-  };
+  #       { mode = "user"; key = "'l'"; effect = ": lint-next-error<ret>"; docstring = "Go to next linting error"; }
+  #       { mode = "user"; key = "'L'"; effect = ": lint-previous-error<ret>"; docstring = "Go to previous linting error"; }
+  #       { mode = "user"; key = "'<a-l>'"; effect = ": lint-disable<ret>"; docstring = "Disable linting"; }
+  #     ];
+  #   };
+  #   extraConfig = (import ./../../kakoune/conf.nix {
+  #     inherit lib pkgs pkgs-unstable;
+  #   });
+  # };
 
   programs.gpg.enable = true;
   services.gpg-agent = {
@@ -447,33 +255,38 @@ in
   services.keybase.enable = true;
   services.kbfs.enable = true;
 
-  # home.file.".emacs.d/init.el".source = ~/repos/dootfeelz/editor/emacs/init.el;
+  # home.file."init.el" = {
+  #   source = ~/repos/dootfeelz/editor/emacs/init.el;
+  #   target = ".emacs.d";
+  # };
+
   # services.emacs.enable = true;
   programs.emacs = {
     enable = true;
-    package = pkgs-unstable.emacs;
   };
 
   home.sessionVariables = {
-    EDITOR = "kak";
+    EDITOR = "subl";
     HOSTALIASES = "${pkgs.stevenblack-hosts}/hosts";
   };
 
   services.udiskie.enable = true;
-
   programs.autorandr.enable = true;
 
-  services.lorri.enable = true;
+  # services.lorri.enable = true;
   programs.direnv = {
     enable = true;
     enableFishIntegration = true;
+    enableNixDirenvIntegration = true;
   };
 
   services.redshift = {
     enable = true;
     tray = true;
-    brightness.day = "1.0";
-    brightness.night = "0.7";
+    settings.redshift = {
+      brightness-day = "1.0";
+      brightness-night = "0.7";
+    };
     provider = "geoclue2";
     # Brisbane lat/long
     # longitude  = "153.0251";
@@ -522,7 +335,7 @@ in
   programs.kitty = {
     enable = true;
     font = {
-      name = "Iosevka Regular 11";
+      name = "Iosevka Semibold 9";
       package = pkgs-unstable.iosevka;
     };
     settings = {
@@ -531,35 +344,6 @@ in
       allow_remote_control = true;
     };
   };
-
-  programs.alacritty = {
-    enable = true;
-    settings = {
-      font = {
-        size = 8.0;
-        normal = {
-          family = "Fira Code";
-          style = "Regular";
-        };
-        italic = {
-          family = "Fira Code";
-        };
-        bold = {
-          family = "Fira Code";
-        };
-      };
-    };
-  };
-
-  # Shamelessly stolen from benkoleras config for great copy/paste justice.
-   # programs.urxvt = {
-   #   enable = true;
-   #   fonts = ["xft:Iosevka=11"];
-   #   keybindings = {
-   #     "Shift-Control-C" = "eval:selection_to_clipboard";
-   #     "Shift-Control-V" = "eval:paste_clipboard";
-   #   };
-   # };
 
   services.pasystray.enable = true;
   services.network-manager-applet.enable = true;
@@ -577,7 +361,10 @@ in
       config = {
         terminal = "kitty";
         modifier = i3mod;
-        fonts = ["FontAwesome 6" "DejaVu Sans Mono 10" "Iosevka Regular 10"];
+        fonts = {
+          names = ["FontAwesome" "DejaVu Sans Mono" "Iosevka Semibold"];
+          size = 9.0;
+        };
         startup =
           [ { command = "/home/manky/.fehbg"; }
           ];

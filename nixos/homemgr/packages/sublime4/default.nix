@@ -11,11 +11,10 @@ let
   binaries = [ "sublime_text" "plugin_host-3.3" "plugin_host-3.8" "crash_reporter" ];
   primaryBinary = "sublime_text";
   primaryBinaryAliases = [ "subl" "sublime" "sublime4" ];
-  # downloadUrl = "https://download.sublimetext.com/sublime_text_3_build_${buildVersion}_${arch}.tar.bz2";
   versionUrl = "https://download.sublimetext.com/latest/${if dev then "dev" else "stable"}";
   versionFile = builtins.toString ./packages.nix;
   arch = "x64";
-  buildVersion = "4098";
+  buildVersion = "4106";
 
   libPath = stdenv.lib.makeLibraryPath [ xorg.libX11 glib gtk3 cairo pango ];
   redirects = [ "/usr/bin/pkexec=${pkexecPath}" ];
@@ -35,7 +34,11 @@ in let
 
     src = fetchurl {
       url = "https://download.sublimetext.com/sublime_text_build_${buildVersion}_${arch}.tar.xz";
-      sha256 = "0mj54v53wyxxlynrk4qqnmpy87g06f9w5vqfsghzbg99p3wxyr4j";
+      sha256 = "09jnn52zb0mjxpj5xz4sixl34cr6j60x46c2dj1m0dlgxap0sh8x";
+      # sha256 = "004ikdj33i82cz6wyr974aqi8shpj7qbndlvfjssjx2ck8skng5v";
+      # sha256 = "19cd48wkzfi8dvsgwyzz4fjipqf3bg57v54l1an5wy02i53ff1l4";
+      # sha256 = "0divhvxnh8hclsz0k9d2yhw3ajchdwc1sw6jvi0pcfqc029r7pqm";
+      # sha256 = "0mj54v53wyxxlynrk4qqnmpy87g06f9w5vqfsghzbg99p3wxyr4j";
       # sha256 = "15ja2y4aj2m4ysxdg2m85mwp5ilpcq73pvm7g2p4dyrfbjzxc6jq";
       # sha256 = "0i566aqk11hwgm31c0pycr68rp0hhyspc1rynhs6b8gc1j1ql9r6";
     };

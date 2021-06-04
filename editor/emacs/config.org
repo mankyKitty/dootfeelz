@@ -1,40 +1,51 @@
-+TITLE: My Emacs Config (omg)
+#+TITLE: My Emacs Config (omg)
 #+AUTHOR: Sean Chalmers
 #+EMAIL: sclhiannan@gmail.com
 #+OPTIONS: num:nil
 
 * Sanity settings
+  Disable the comp warning spam
+  #+begin_src emacs-lisp
+(setq comp-async-compilation t)
+(setq comp-async-env-modifier-form
+      '((setenv "LIBRARY_PATH"
+                (concat
+                 (shell-command-to-string "nix eval --raw '(let pkgs = import <nixpkgs> {}; in with pkgs; stdenv.lib.makeLibraryPath [stdenv.cc.cc stdenv.glibc])'")
+                 ":"
+                 (shell-command-to-string "nix eval --raw '(let pkgs = import <nixpkgs> {}; in with pkgs; lib.getLib libgccjit + /lib/gcc/x86_64-unknown-linux-gnu/9.3.0 )'")))))
+(setq-default comp-async-report-warnings-errors nil)
+  #+end_src
   Disable tabs, we're not monsters
   #+BEGIN_SRC emacs-lisp
 ;; (setq debug-on-error t)
-    (setq-default indent-tabs-mode nil)
-    (setq-default electric-indent-inhibit t)
+(setq-default indent-tabs-mode nil)
+(setq-default electric-indent-inhibit t)
   #+END_SRC
 
   Enable the unicodening to annoy jackd
   #+begin_src emacs-lisp
-    (set-language-environment "UTF-8")
-    (set-default-coding-systems 'utf-8)
+(set-language-environment "UTF-8")
+(set-default-coding-systems 'utf-8)
   #+end_src
 
   Set a global tab width to two spaces
   #+BEGIN_SRC emacs-lisp
-    (setq-default tab-width 2)
+(setq-default tab-width 2)
   #+END_SRC
 
   Fix up some modes that have their own snowflake variables for indentation.
   #+BEGIN_SRC emacs-lisp
-    (setq-default css-indent-offset 2)
+(setq-default css-indent-offset 2)
   #+END_SRC
 
   Move our backups out of sight
   #+BEGIN_SRC emacs-lisp
-    (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
-    (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+(setq backup-directory-alist `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
   #+END_SRC
   Set out GC threshold to 50Mb instead of 800Kb
   #+BEGIN_SRC emacs-lisp
-    (setq gc-cons-threshold 50000000)
+(setq gc-cons-threshold 50000000)
   #+END_SRC
 
   #+BEGIN_SRC emacs-lisp
@@ -157,6 +168,7 @@
         "j W" 'avy-goto-word-0
         "j o" 'avy-org-goto-heading-timer
         "j R" 'avy-org-refile-as-child
+        "j b" 'avy-pop-mark
         )
       )
   #+END_SRC
@@ -167,12 +179,14 @@
     (tooltip-mode    -1)
     (menu-bar-mode   -1)
     (setq-default inhibit-startup-screen t)
-    (setq default-frame-alist '((font . "-ADBO-Source Code Pro-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")))
+    ;; (setq default-frame-alist '((font . "-ADBO-Source Code Pro-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")))
     ;; (setq default-frame-alist '((font . "-POOP-Fixedsys Excelsior 3.01-normal-normal-normal-*-16-*-*-*-*-0-iso10646-1")))
     ;; (setq default-frame-alist '((font . "-V.R.-PxPlus IBM VGA9-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")))
-    ;; (setq default-frame-alist '((font . "-CYEL-Iosevka-normal-normal-normal-*-14-*-*-*-d-0-iso10646-1")))
+    (setq default-frame-alist '((font . "-BE5N-Iosevka-semibold-normal-normal-*-13-*-*-*-d-0-iso10646-1")))
     ;; (setq default-frame-alist '((font . "-UKWN-mononoki-normal-normal-normal-*-13-*-*-*-*-0-iso10646-1")))
     ;; (setq default-frame-alist '((font . "-CTDB-Fira Code-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")))
+    ;; (setq default-frame-alist '((font . "-ADBO-Hasklig-normal-normal-normal-*-12-*-*-*-m-0-iso10646-1")))
+
   #+END_SRC
 * Prescient
   #+begin_src emacs-lisp
@@ -529,6 +543,21 @@
   (push "build" counsel-etags-ignore-directories))
    #+end_src
 * Language Modes!! OMG
+** Purescript
+#+begin_src emacs-lisp
+(use-package purescript-mode
+  :ensure t
+)
+(use-package psc-ide
+  :ensure t
+  :after (purescript-mode)
+  :hook (purescript-mode . (lambda ()
+           (psc-ide-mode)
+               (company-mode)
+               (flycheck-mode)
+               (turn-on-purescript-indentation)))
+)
+#+end_src
 ** CPP
    #+begin_src emacs-lisp
      (use-package clang-format
@@ -653,21 +682,21 @@
 #+END_SRC
 ** Leesp
 #+BEGIN_SRC emacs-lisp
-(use-package geiser
-  :ensure t
-  :hook (scheme-mode . geiser-mode)
-)
+;; (use-package geiser
+;;   :ensure t
+;;   :hook (scheme-mode . geiser-mode)
+;; )
 ; (use-package guile :ensure t)
 (use-package paredit
   :ensure t
   :config
-  (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
-  (add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
-  (add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
-  (add-hook 'ielm-mode-hook             #'enable-paredit-mode)
-  (add-hook 'lisp-mode-hook             #'enable-paredit-mode)
-  (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
-  (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
+  ;; (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
+  ;; (add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
+  ;; (add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
+  ;; (add-hook 'ielm-mode-hook             #'enable-paredit-mode)
+  ;; (add-hook 'lisp-mode-hook             #'enable-paredit-mode)
+  ;; (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
+  ;; (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
 
   (require 'eldoc) ; if not already loaded
   (eldoc-add-command
@@ -764,6 +793,18 @@
        :defer t
        :mode ("\\.fs\\'" . fsharp-mode)
      )
+   #+end_src
+** GNU Smalltalk
+   #+begin_src emacs-lisp
+;; (use-package smalltalk-mode
+;;   :ensure t
+;; )
+;; (use-package shampoo :ensure t)
+   #+end_src
+** Ada2012
+   #+begin_src emacs-lisp
+;; (use-package ada-mode :ensure t)
+;; (use-package ada-ref-man :ensure t)
    #+end_src
 
 * Checking & Linting
@@ -969,7 +1010,7 @@ Clean up the mode line a bit as it gets a bit busy by default.
     :hook (prog-mode-hook . yas-minor-mode)
     :diminish yas-minor-mode
     :config
-    (with-eval-after-load 'yasnippet (setq yas-snippet-dirs '(yasnippet-snippets-dir)))
+    ;; (with-eval-after-load 'yasnippet (setq yas-snippet-dirs '(yasnippet-snippets-dir)))
     (define-key yas-minor-mode-map (kbd "C-'") #'yas-expand)
     (yas-reload-all)
     (yas-global-mode)
@@ -982,6 +1023,13 @@ Clean up the mode line a bit as it gets a bit busy by default.
 
   (use-package haskell-snippets :ensure t)
 #+END_SRC
+* Zettelkatsen
+  #+begin_src emacs-lisp
+    (use-package neuron-mode :ensure t
+      :config
+      (setq-default neuron-default-zettelkasten-directory "~/documents/zettelkasten")
+    )
+  #+end_src
 * Writeroom
 #+BEGIN_SRC emacs-lisp
 (use-package visual-fill-column
@@ -1042,13 +1090,6 @@ Clean up the mode line a bit as it gets a bit busy by default.
   )
 #+END_SRC emacs-lisp
 
-** ~company-lsp~
- #+begin_src emacs-lisp
-(use-package company-lsp
-  :ensure t
-  :after (company-mode lsp-mode)
-  :commands company-lsp)
- #+end_src
 ** ~lsp-treemacs~
    Workspace wide error navigation/overview
    #+begin_src emacs-lisp

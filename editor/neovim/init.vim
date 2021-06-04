@@ -35,7 +35,8 @@ Plug 'bling/vim-airline'
 Plug 'scrooloose/nerdtree'
 Plug 'tpope/vim-surround'
 Plug 'vim-crystal/vim-crystal'
-Plug 'Raku/vim-raku' 
+Plug 'Raku/vim-raku'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Te he
 " Plug 'alex-ren/org.ats-lang.toolats', { 'rtp': 'org.ats-lang.toolats.vim' }

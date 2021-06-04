@@ -1,0 +1,26 @@
+{
+    "easy-hls-nix": {
+        "branch": "main",
+        "description": "Easy Haskell Language Server tooling with Nix!",
+        "homepage": "",
+        "owner": "jkachmar",
+        "repo": "easy-hls-nix",
+        "rev": "291cf77f512a7121bb6801cde35ee1e8b7287f91",
+        "sha256": "1bvbcp9zwmh53sm16ycp8phhc6vzc72a71sf0bvyjgfbn6zp68bc",
+        "type": "tarball",
+        "url": "https://github.com/jkachmar/easy-hls-nix/archive/291cf77f512a7121bb6801cde35ee1e8b7287f91.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "niv": {
+        "branch": "master",
+        "description": "Easy dependency management for Nix projects",
+        "homepage": "https://github.com/nmattia/niv",
+        "owner": "nmattia",
+        "repo": "niv",
+        "rev": "1819632b5823e0527da28ad82fecd6be5136c1e9",
+        "sha256": "08jz17756qchq0zrqmapcm33nr4ms9f630mycc06i6zkfwl5yh5i",
+        "type": "tarball",
+        "url": "https://github.com/nmattia/niv/archive/1819632b5823e0527da28ad82fecd6be5136c1e9.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    }
+}
