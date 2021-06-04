@@ -117,10 +117,6 @@ in
     pkgs-unstable.universal-ctags
     pkgs-unstable.ripgrep
 
-    # Sigh...
-    pkgs-unstable.ledger-live-desktop
-    pkgs-unstable.ledger-udev-rules
-
     # fonts
     iosevka
     mononoki
@@ -145,6 +141,11 @@ in
     # Editor(s)
     sublime4
     wrappedVSCode
+
+    # Sigh...
+    pkgs-unstable.ledger-live-desktop
+    pkgs-unstable.ledger-udev-rules
+
 
     # gamez
     pkgs-unstable.steam
