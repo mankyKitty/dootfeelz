@@ -22,5 +22,11 @@
         "type": "tarball",
         "url": "https://github.com/nmattia/niv/archive/1819632b5823e0527da28ad82fecd6be5136c1e9.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "stevenblackhosts": {
+        "sha256": "1cjg29gysijahv0xnppyk2r9rfanbsvxfrrz2dhfid6qwfr8hziy",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
+        "url_template": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
     }
 }

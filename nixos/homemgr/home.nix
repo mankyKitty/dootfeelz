@@ -1,9 +1,16 @@
 { config, pkgs, lib, ... }:
 let
   from-home = dir: ./repos/dootfeelz/nixos/homemgr + dir;
-  pkgs-unstable = import <nixpkgs-unstable> { config = { allowBroken = true; allowUnfree = true; }; };
 
-  nivToken = "2578eeea7034fb742727846f1ac3eba02fd9762c";
+  # Unstable is my default when using nix on darwin, for better or worse.
+  pkgs-unstable = if pkgs.stdenv.isDarwin then pkgs else import <nixpkgs-unstable> {
+    config = {
+      allowBroken = true;
+      allowUnfree = true;
+    };
+  };
+
+  # nivToken = "2578eeea7034fb742727846f1ac3eba02fd9762c";
 
   vsCodeWithSomeExtensions = pkgs-unstable.vscode-with-extensions.override (_: {
     vscodeExtensions =  with pkgs-unstable.vscode-extensions; [
@@ -61,8 +68,13 @@ in
   ];
 
   home.stateVersion = "21.05";
-  home.username = "manky";
-  home.homeDirectory = /home/manky;
+  home.username = if pkgs.stdenv.isDarwin
+    then "mankypants"
+    else "manky";
+
+  home.homeDirectory = if pkgs.stdenv.isDarwin
+    then /Users/mankypants
+    else /home/manky;
 
   # Misc apps etc
   home.packages = with pkgs; [
@@ -76,15 +88,6 @@ in
 
     # system
     file
-    cacert
-    sudo
-    dmenu
-    alsaUtils
-    upower
-    powertop
-    xorg.xbacklight
-    networkmanagerapplet
-
     cachix
     dnsmasq
     fmt
@@ -97,13 +100,6 @@ in
 
     git-crypt
     gitAndTools.gitui
-
-    # gamez
-    pkgs-unstable.steam
-
-    # editor shenanigans
-    sublime4
-    wrappedVSCode
 
     # For neovim CoC
     pkgs-unstable.nodejs
@@ -121,6 +117,38 @@ in
     pkgs-unstable.universal-ctags
     pkgs-unstable.ripgrep
 
+    # Sigh...
+    pkgs-unstable.ledger-live-desktop
+    pkgs-unstable.ledger-udev-rules
+
+    # fonts
+    iosevka
+    mononoki
+    roboto-mono
+    font-awesome-ttf
+
+    # nix-tility
+    nix-prefetch-scripts
+    pkgs-unstable.haskellPackages.niv
+
+  ] ++ (if pkgs.stdenv.isLinux then with pkgs; [
+    # System utils
+    cacert
+    sudo
+    dmenu
+    alsaUtils
+    upower
+    powertop
+    xorg.xbacklight
+    networkmanagerapplet
+
+    # Editor(s)
+    sublime4
+    wrappedVSCode
+
+    # gamez
+    pkgs-unstable.steam
+
     # apps
     evince
     pandoc
@@ -130,20 +158,6 @@ in
     pkgs-unstable.blender
     libreoffice
 
-    # Sigh...
-    pkgs-unstable.ledger-live-desktop
-    pkgs-unstable.ledger-udev-rules
-
-    # fonts
-    # iosevka
-    mononoki
-    roboto-mono
-    font-awesome-ttf
-
-    # nix-tility
-    nix-prefetch-scripts
-    pkgs-unstable.haskellPackages.niv
-
     # omg unfree!
     spotify
     playerctl
@@ -151,22 +165,26 @@ in
     pkgs-unstable.discord
     pkgs-unstable.brave
     # slack
-  ];
+  ] else if pkgs.stdenv.isDarwin then [
 
-  programs.feh.enable = true;
+  ] else [
+
+  ]);
+
+  programs.feh.enable = !pkgs.stdenv.isDarwin;
   programs.jq.enable = true;
   programs.htop.enable = true;
 
-  programs.qutebrowser = {
-    enable = true;
-    searchEngines = {
-      w = "https://en.wikipedia.org/wiki/Special:Search?search={}&go=Go&ns0=1";
-      archw = "https://wiki.archlinux.org/?search={}";
-      nw = "https://nixos.wiki/index.php?search={}";
-      goog = "https://www.google.com/search?hl=en&q={}";
-      hack = "https://hackage.haskell.org/package/{}";
-    };
-  };
+  # programs.qutebrowser = {
+  #   enable = true;
+  #   searchEngines = {
+  #     w = "https://en.wikipedia.org/wiki/Special:Search?search={}&go=Go&ns0=1";
+  #     archw = "https://wiki.archlinux.org/?search={}";
+  #     nw = "https://nixos.wiki/index.php?search={}";
+  #     goog = "https://www.google.com/search?hl=en&q={}";
+  #     hack = "https://hackage.haskell.org/package/{}";
+  #   };
+  # };
 
   programs.fish = {
     enable = true;
@@ -187,7 +205,7 @@ in
   };
 
   home.file.".fehbg" = {
-    executable = true;
+    executable = !pkgs.stdenv.isDarwin;
     onChange = "/home/manky/.fehbg";
     text = ''
     #!/usr/bin/env bash
@@ -202,8 +220,8 @@ in
     withPython3 = true;
   };
 
-  programs.firefox.enable = true;
-  programs.chromium.enable = true;
+  programs.firefox.enable = !pkgs.stdenv.isDarwin;
+  programs.chromium.enable = !pkgs.stdenv.isDarwin;
   programs.fzf.enable = true;
 
   # home.file.".config/kak/colors" = {
@@ -243,37 +261,34 @@ in
 
   programs.gpg.enable = true;
   services.gpg-agent = {
-    enable = true;
+    enable = !pkgs.stdenv.isDarwin;
     pinentryFlavor = "curses";
     grabKeyboardAndMouse = true;
   };
   services.gnome-keyring = {
-    enable = true;
+    enable = !pkgs.stdenv.isDarwin;
     components = [ "pkcs11" "secrets" "ssh" ];
   };
 
-  services.keybase.enable = true;
-  services.kbfs.enable = true;
+  services.keybase.enable = !pkgs.stdenv.isDarwin;
+  services.kbfs.enable = !pkgs.stdenv.isDarwin;
 
   # home.file."init.el" = {
   #   source = ~/repos/dootfeelz/editor/emacs/init.el;
   #   target = ".emacs.d";
   # };
 
-  # services.emacs.enable = true;
   programs.emacs = {
     enable = true;
   };
 
   home.sessionVariables = {
     EDITOR = "subl";
-    HOSTALIASES = "${pkgs.stevenblack-hosts}/hosts";
   };
 
-  services.udiskie.enable = true;
-  programs.autorandr.enable = true;
+  services.udiskie.enable = !pkgs.stdenv.isDarwin;
+  programs.autorandr.enable = !pkgs.stdenv.isDarwin;
 
-  # services.lorri.enable = true;
   programs.direnv = {
     enable = true;
     enableFishIntegration = true;
@@ -281,7 +296,7 @@ in
   };
 
   services.redshift = {
-    enable = true;
+    enable = !pkgs.stdenv.isDarwin;
     tray = true;
     settings.redshift = {
       brightness-day = "1.0";
@@ -294,7 +309,7 @@ in
   };
 
   services.xscreensaver = {
-    enable = true;
+    enable = !pkgs.stdenv.isDarwin;
     settings = {
       lock = true;
     };
@@ -345,9 +360,9 @@ in
     };
   };
 
-  services.pasystray.enable = true;
-  services.network-manager-applet.enable = true;
-  services.blueman-applet.enable = true;
+  services.pasystray.enable = !pkgs.stdenv.isDarwin;
+  services.network-manager-applet.enable = !pkgs.stdenv.isDarwin;
+  services.blueman-applet.enable = !pkgs.stdenv.isDarwin;
   systemd.user.startServices = true;
 
   xsession =
@@ -355,9 +370,9 @@ in
       i3mod = "Mod4";
       plyr = cmd: "exec playerctl --player=spotify ${cmd}";
     in {
-    enable = true;
+    enable = !pkgs.stdenv.isDarwin;
     windowManager.i3 = {
-      enable = true;
+      enable = !pkgs.stdenv.isDarwin;
       config = {
         terminal = "kitty";
         modifier = i3mod;

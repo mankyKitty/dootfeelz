@@ -1,16 +1,14 @@
-{ config, pkgs, unstable, ... }:
+{ config, pkgs, ... }:
 let
-  pkgs-unstable = import <nixpkgs-unstable> {};
+  # Unstable is my default when using nix on darwin, for better or worse.
+  pkgs-unstable = if pkgs.stdenv.isDarwin then pkgs else import <nixpkgs-unstable> {
+    config = {
+      allowBroken = true;
+      allowUnfree = true;
+    };
+  };
 
-  niv-srcs = import ./nix/sources.nix;
-  # easy-hls-src = pkgs.fetchFromGitHub {
-  #   owner  = "jkachmar";
-  #   repo   = "easy-hls-nix";
-  #   rev = "cf0cb016e1c57934592fd4c9d07d6b7a67d3f6ce";
-  #   sha256 = "1whs5xckd1p4r8xskyfh5h098ks0fw1ki3ccjgb1fpmc4hbdx7sb";
-  # };
-
-  easy-hls = pkgs.callPackage (niv-srcs.easy-hls-nix) {
+  easy-hls = pkgs.callPackage (import ./nix/sources.nix).easy-hls-nix {
     ghcVersions = [
       # nixpkgs style: "865" "884"
 
@@ -22,7 +20,7 @@ let
       "8.8.4"
       # "8.10.2"
       # "8.10.3"
-      # "8.10.4"
+      "8.10.4"
     ];
   };
 
@@ -36,7 +34,7 @@ in
     python3
   ] # Haskell Shenanigans
   ++ (with pkgs.haskellPackages; [
-    # easy-hls
+    # easy-hls # One day this will work :/
 
     cabal-install
     ghcid

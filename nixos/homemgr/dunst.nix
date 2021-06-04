@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   services.dunst = {
-    enable = true;
+    enable = !pkgs.stdenv.isDarwin;
     settings = {
       global = {
         font = "Fira Code 11";
